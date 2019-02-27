@@ -2,6 +2,8 @@
 
 文档作者: HITwh Vegetable Group :: ArHShRn
 
+Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
+
 # 镜像编译
 
 基于Docker镜像搭建服务器节点资源监视平台，实现弹性分配
@@ -269,6 +271,8 @@
 
 3. 修改Dockerfile
 
+   选项1：全编译
+
    ```dockerfile
    # Golang build container
    FROM golang:1.11
@@ -356,6 +360,90 @@
    ENTRYPOINT [ "/run.sh" ]
    ```
 
+   选项2：仅编译最终容器
+
+   ```dockerfile
+   # Golang build container
+   FROM golang:1.11
+   
+   WORKDIR $GOPATH/src/github.com/grafana/grafana
+   
+   COPY Gopkg.toml Gopkg.lock ./
+   COPY vendor vendor
+   
+   ARG DEP_ENSURE=""
+   RUN if [ ! -z "${DEP_ENSURE}" ]; then \
+         go get -u github.com/golang/dep/cmd/dep && \
+         dep ensure --vendor-only; \
+       fi
+   
+   COPY pkg pkg
+   COPY build.go build.go
+   COPY package.json package.json
+   
+   RUN go run build.go build
+   
+   # Node build container
+   FROM node:8
+   
+   WORKDIR /usr/src/app/
+   
+   RUN wget https://dl.grafana.com/oss/release/grafana-5.4.0.linux-amd64.tar.gz
+   RUN tar -zxvf grafana-5.4.0.linux-amd64.tar.gz grafana-5.4.0/tools
+   RUN tar -zxvf grafana-5.4.0.linux-amd64.tar.gz grafana-5.4.0/public
+   RUN mv grafana-5.4.0/tools/ ./tools
+   RUN mv grafana-5.4.0/public ./public
+   
+   # Final container
+   FROM debian:stretch-slim
+   LABEL maintainer="HITwh Vegetable Group <https://github.com/hitwh-vegetable-group>"
+   
+   ARG GF_UID="472"
+   ARG GF_GID="472"
+   
+   ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+       GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
+       GF_PATHS_DATA="/var/lib/grafana" \
+       GF_PATHS_HOME="/usr/share/grafana" \
+       GF_PATHS_LOGS="/var/log/grafana" \
+       GF_PATHS_PLUGINS="/var/lib/grafana/plugins" \
+       GF_PATHS_PROVISIONING="/etc/grafana/provisioning"
+   
+   WORKDIR $GF_PATHS_HOME
+   
+   RUN apt-get update && apt-get upgrade -y && \
+       apt-get install -qq -y libfontconfig ca-certificates && \
+       apt-get autoremove -y && \
+       rm -rf /var/lib/apt/lists/*
+   
+   COPY conf ./conf
+   
+   RUN mkdir -p "$GF_PATHS_HOME/.aws" && \
+       groupadd -r -g $GF_GID grafana && \
+       useradd -r -u $GF_UID -g grafana grafana && \
+       mkdir -p "$GF_PATHS_PROVISIONING/datasources" \
+                "$GF_PATHS_PROVISIONING/dashboards" \
+                "$GF_PATHS_LOGS" \
+                "$GF_PATHS_PLUGINS" \
+                "$GF_PATHS_DATA" && \
+       cp "$GF_PATHS_HOME/conf/sample.ini" "$GF_PATHS_CONFIG" && \
+       cp "$GF_PATHS_HOME/conf/ldap.toml" /etc/grafana/ldap.toml && \
+       chown -R grafana:grafana "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS" && \
+       chmod 777 "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS"
+   
+   COPY --from=0 /go/src/github.com/grafana/grafana/bin/linux-amd64/grafana-server /go/src/github.com/grafana/grafana/bin/linux-amd64/grafana-cli ./bin/
+   COPY --from=1 /usr/src/app/public ./public
+   COPY --from=1 /usr/src/app/tools ./tools
+   COPY tools/phantomjs/render.js ./tools/phantomjs/render.js
+   
+   EXPOSE 3000
+   
+   COPY ./packaging/docker/run.sh /run.sh
+   
+   USER grafana
+   ENTRYPOINT [ "/run.sh" ]
+   ```
+
    
 
 4. 构建镜像
@@ -367,4 +455,72 @@
    
 
 # 服务器节点资源监视平台搭建
+
+搭建成功后效果如图所示：
+
+
+
+## 放通防火墙
+
+推荐防火墙策略为：云服务器提供商处端口全开，用ubuntu内置防火墙ufw
+
+放通3000 9090 9100端口
+
+```bash
+ufw allow 3000 && ufw allow 9090 && ufw allow 9100
+```
+
+## 启动监控服务
+
+1. 创建启动脚本
+
+   ```bash
+   mkdir /home/monitor
+   cd /home/monitor
+   vi ./start_monitor.bash
+   ```
+
+   ```bash
+   # License: GNU AGPL v3.0
+   # Author: HITwh Vegetable Group :: ArHShRn
+   #!/bin/sh
+     
+   #Promethus
+   docker run -d --restart=always -p 9090:9090 --name=prometheus hitwhvg/prometheus:v2.5
+   
+   #Node Exporter
+   docker run -d --restart=always -p 9100:9100 --name=node-exporter hitwhvg/node-exporter:v0.17.0
+   
+   #Grafana
+   docker run -d --restart=always -p 3000:3000 --name=grafana hitwhvg/grafana:v5.4.0
+   ```
+
+   
+
+2. 运行启动脚本
+
+   ```bash
+   bash ./start_monitor.bash
+   ```
+
+   
+
+3. 访问端口测试是否启动成功
+
+   ```
+   curl localhost:9090
+   ```
+
+   预期结果
+
+   ```html
+   <a href="/graph">Found</a>.
+   
+   ```
+
+
+
+## 配置Grafana
+
+### 初次使用
 
