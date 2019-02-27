@@ -1,6 +1,8 @@
 开源许可 GNU AGPL v3.0
 
-# BECS 服务器后端环境部署
+文档作者: HITwh Vegetable Group :: ArHShRn
+
+# 服务器后端环境部署
 
 *为了去除sudo的复杂性，所有操作均在ROOT用户下执行*
 
@@ -202,3 +204,35 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
      OS/Arch:          linux/amd64
      Experimental:     false
    ```
+
+### 解决PULL镜像速度过慢的问题
+
+####Docker 中国官方镜像
+
+在使用时，Docker 中国官方镜像加速可通过 registry.docker-cn.com 访问。
+
+该镜像库只包含流行的公有镜像。私有镜像仍需要从美国镜像库中拉取。
+
+例如：
+
+```
+docker pull registry.docker-cn.com/library/ubuntu:16.04
+```
+
+#### 配置 Docker 守护进程
+
+配置 Docker 守护进程默认使用 Docker 官方镜像加速，这样可以默认通过官方镜像加速拉取镜像，而无需在每次拉取时指定 registry.docker-cn.com
+
+具体方法为：修改 `/etc/docker/daemon.json` 文件并添加上 registry-mirrors 键值
+
+```json
+{
+  "registry-mirrors": ["https://registry.docker-cn.com"]
+}
+```
+
+保存后重启 Docker 以生效
+
+```bash
+systemctl restart docker
+```

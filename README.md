@@ -1,6 +1,8 @@
 开源许可 GNU AGPL v3.0
 
-# 边缘系统* BECS
+文档作者: HITwh Vegetable Group :: ArHShRn
+
+# 软件工程课程设计项目*
 
 注意：
 
@@ -16,25 +18,27 @@ Caution:
 
   
 
-  *此为别名，具体名称见课程设计报告
+  *具体名称见课程设计报告
 
-## BECS 简介
+## 简介
 
-这是大学第三年课程设计项目*，课程为软件工程。
+这是大学第三年软件工程课程设计项目*
+
+对于项目中涉及到的内容，均有中文文档进行详细讲解。
 
 *详细介绍请见课程设计报告
 
-## BECS 特点
+## 特点
 
-- 边缘计算
-- Docker，Kubernetes以及服务器集群
-- Ansible自动部署
-- 抗毁性
+- Edge Computing 边缘计算
+- Docker，Kubernetes以及Server Clusters服务器集群
+- Ansible 自动化部署
+- Appveyor 持续集成
 
-## BECS 运行环境
+## 运行环境
 
 ### 前端
 
 ### 后端
 
-- Ubuntu 16.04.5 LTS
+- Ubuntu 16.04.5 LTS x3
