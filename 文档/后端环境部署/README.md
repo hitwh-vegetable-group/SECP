@@ -24,9 +24,7 @@
    mv ./source.list ./source.list.origin
    ```
 
-3. 进入
-
-   [清华大学开源软件镜像站]: https://mirror.tuna.tsinghua.edu.cn/help/ubuntu/	"清华大学开源软件镜像站"
+3. 进入[清华大学开源软件镜像站](https://mirror.tuna.tsinghua.edu.cn/help/ubuntu/)
 
    选择 16.04 LTS 拷贝所有文本（或者直接利用以下提供的）
 
