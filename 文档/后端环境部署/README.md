@@ -6,7 +6,7 @@
 
 - [x] APT 换清华大学源以及软件更新
 - [x] Golang 环境配置
-- [ ] Docker 环境配置
+- [x] Docker 环境配置
 - [ ] etcd 环境配置
 - [ ] Kubernetes 环境配置
 
@@ -67,6 +67,7 @@
    ```bash
    cd /home
    mkdir ./golang
+   cd ./golang
    wget https://studygolang.com/dl/golang/go1.12.linux-amd64.tar.gz
    ```
 
@@ -92,18 +93,18 @@
 2. 解压缩tarball到 /usr/local 目录下
 
    ```bash
-   tar -zxzf ./go1.12.linux-amd64.tar.gz -C /usr/local
+   tar -zxvf ./go1.12.linux-amd64.tar.gz -C /usr/local
    ```
 
 3. 编辑当前用户环境变量
 
-   ```
+   ```bash
    vi ~/.profile
    ```
 
 4. 为GOLANG添加GOROOT GOPATH 环境变量
 
-   ```
+   ```bash
    export GOROOT=/usr/local/go
    export GOPATH=/etc/gopath
    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
@@ -113,7 +114,7 @@
 
 5. 载入环境变量
 
-   ```
+   ```bash
    source ~/.profile
    ```
 
@@ -121,8 +122,88 @@
 
 6. 查看Golang版本以检查Golang是否成功配置完成
 
-   ```
+   ```bash
    go version
+   ```
+
+   
+
+## Docker 环境配置
+
+### 删除之前的安装
+
+仅删除可执行文件
+
+```bash
+apt remove -y docker docker-ce docker-engine docker.io containerd runc
+```
+
+删除包括所有配置文件
+
+```
+apt purge -y docker docker-ce docker-engine docker.io containerd runc
+```
+
+
+
+###获取并安装DOCKER-CE
+
+1. 获取Containerd、Docker CE CLI以及Docker CE（注意，安装顺序也如此）
+
+   ```bash
+   cd /home
+   mkdir ./docker
+   cd ./docker
+   wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.2.2-3_amd64.deb
+   wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_18.09.2~3-0~ubuntu-xenial_amd64.deb
+   wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_18.09.2~3-0~ubuntu-xenial_amd64.deb
+   ```
+
+   
+
+2. 安装获取的三个包
+
+   ```bash
+   dpkg -i ./containerd.io_1.2.2-3_amd64.deb
+   dpkg -i ./docker-ce-cli_18.09.2~3-0~ubuntu-xenial_amd64.deb
+   dpkg -i ./docker-ce_18.09.2~3-0~ubuntu-xenial_amd64.deb
+   ```
+
+   
+
+3. 启动Docker服务
+
+   ```bash
+   systemctl restart docker
+   ```
+
+4. 查看Docker版本以检查Docker是否成功配置完成
+
+   ```
+   docker version
+   ```
+
+   期望的输出
+
+   ```
+   Client:
+    Version:           18.09.2
+    API version:       1.39
+    Go version:        go1.10.6
+    Git commit:        6247962
+    Built:             Sun Feb 10 04:13:50 2019
+    OS/Arch:           linux/amd64
+    Experimental:      false
+   
+   Server: Docker Engine - Community
+    Engine:
+     Version:          18.09.2
+     API version:      1.39 (minimum version 1.12)
+     Go version:       go1.10.6
+     Git commit:       6247962
+     Built:            Sun Feb 10 03:42:13 2019
+     OS/Arch:          linux/amd64
+     Experimental:     false
    ```
 
    
