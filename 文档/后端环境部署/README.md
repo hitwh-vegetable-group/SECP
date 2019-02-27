@@ -207,7 +207,7 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
 
 ### 解决PULL镜像速度过慢的问题
 
-####Docker 中国官方镜像
+#### Docker 中国官方镜像
 
 在使用时，Docker 中国官方镜像加速可通过 registry.docker-cn.com 访问。
 
