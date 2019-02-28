@@ -678,13 +678,13 @@ ip a | grep docker0
 
 #### 添加本项目提供的JSON仪表盘
 
-1. 打开 [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0/BECS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E9%9D%A2%E6%9D%BF.json)
+1. 打开 [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/monitor/BECS-NODE%20Panel.json)
 
 2. 进入 Grafana 面板，点击左边工具栏的 + 号图标，选择 Import
 
    ![import](./pics/grafana/8.jpg)
 
-3. 拷贝  [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0/BECS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E9%9D%A2%E6%9D%BF.json) 到如图所示位置，然后点击 Load
+3. 拷贝  [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/monitor/BECS-NODE%20Panel.json) 到如图所示位置，然后点击 Load
 
    ![loadjson](./pics/grafana/9.jpg)
 
