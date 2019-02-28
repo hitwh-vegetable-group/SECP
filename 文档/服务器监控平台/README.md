@@ -458,7 +458,7 @@ Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
 
 搭建成功后效果如图所示：
 
-
+![dashboard](.\pics\dashboard.jpg)
 
 ## 放通防火墙
 
@@ -469,6 +469,8 @@ Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
 ```bash
 ufw allow 3000 && ufw allow 9090 && ufw allow 9100
 ```
+
+
 
 ## 启动监控服务
 
@@ -520,34 +522,170 @@ ufw allow 3000 && ufw allow 9090 && ufw allow 9100
 
 
 
+## 配置 Prometheus 与 Node Exporter
+
+Granafa将从数据源获取数据并将其可视化，所以必须要添加一个数据源才能正常使用Grafana。
+
+在此我们使用的是 Prometheus 作为系统监控的数据源，并使用 Node Exporter 对数据导出为我们需要的数据，然后Grafana将会对其进行可视化。
+
+于是首先，我们需要对 Prometheus 进行配置，让 Node Exporter 能够顺利导出 Prometheus 抓取的数据。
+
+### 获取 Docker 网桥IP地址
+
+由于我们创建的容器来运行这三个服务，所以这三个服务要成功互相通信则必须要知道真实主机（本机）的 Docker 网桥IP地址。
+
+```
+ip a | grep docker0
+```
+
+一般来说，地址应该为172.17.0.1
+
+### 进入 Prometheus 的容器修改配置文件
+
+1. 进入容器
+
+   ```
+   docker exec -it prometheus /bin/sh
+   ```
+
+   
+
+2. 在配置文件最后添加一些代码并保存
+
+   ```
+   vi /etc/prometheus/prometheus.yml
+   ```
+
+   ```yaml
+     - job_name: node_exporter
+       static_configs:
+         - targets: ['127.0.0.1:9100']
+   ```
+
+   
+
+3. 退出容器
+
+   ```
+   exit
+   ```
+
+   
+
+4. 重新启动容器
+
+   ```
+   docker restart prometheus
+   ```
+
+   
+
+5. 进入 Prometheus 的 Targets 后台查看 Node Exporter 状态是否为 UP
+
+   http://ServerIP:9090/targets
+
+   ![pro-jobs](.\pics\prometheus\jobs.jpg)
+
+6. 如果为 DOWN 则配置错误，请检查防火墙状态以及在第2步填写的IP地址、端口号是否有误
+
 ## 配置Grafana
 
 ### 初次使用
 
 1. 进入 SeverIP:3000 出现以下界面
 
-   ![grafana_login](.\pics\grafana_login.jpg)
+   ![grafana_login](.\pics\grafana\1.jpg)
 
 2. 初始用户名以及密码均为admin，登陆过后Grafana将提示我们修改密码
 
-   ![changepwd](.\pics\change_pwd.jpg)
+   ![changepwd](.\pics\grafana\2.jpg)
 
 3. 点击 Save 后将进入 Home Dashboard 界面
 
-   ![homepage](.\pics\homepage.jpg)
+   ![homepage](.\pics\grafana\3.jpg)
 
 ### 添加数据源
 
-Granafa将从数据源获取数据并将其可视化，所以必须要添加一个数据源才能正常使用Grafana，在此我们使用的是 Prometheus 作为系统监控的数据源，并使用 Node Exporter 对数据导出为我们需要的数据，然后Grafana将会对其进行可视化。
-
 1. 点击Home Dashboard中的 Add data source
 
-   ![datasrc1](.\pics\datasource\1.jpg)
+   ![datasrc1](.\pics\grafana\4.jpg)
 
 2. 选择 Prometheus
 
-   ![datasrc2](.\pics\datasource\2.jpg)
+   ![datasrc2](.\pics\grafana\5.jpg)
 
 3. 出现如图所示页面，开始进行详细配置
 
-   ![datasrc3](.\pics\datasource\3.png)
+   为了简化文档，我们只进行基本配置，于是只需要填写 Prometheus 后台网页URL即可
+
+   请填写 http://172.17.0.1:9090
+
+   ![datasrc3](./pics/grafana/6.png)
+
+4. 点击 Save & Test 按钮，Grafana 将会检测是否能够成功抓取数据。如果完全按照本文档步骤的话是能够成功抓取的，如果不能成功抓取，请仔细参考本一级标题下的二级标题“配置 Prometheus 与 Node Exporter”中的内容。以下为成功后显示的消息：
+
+   ![success](.\pics\grafana\7.jpg)
+
+### 添加本项目提供的JSON仪表盘
+
+本项目的 Grafana 仪表盘由StarsL.cn提供的仪表盘修改而成，需要添加额外插件才能运行。
+
+#### 给 Grafana 添加 Pie Chart 插件
+
+1. 进入 Grafana 容器
+
+   ```
+   docker exec -it grafana /bin/sh
+   ```
+
+   
+
+2. 输入命令行安装插件
+
+   ```
+   grafana-cli plugins install grafana-piechart-panel
+   ```
+
+   成功后显示
+
+   ```
+   installing grafana-piechart-panel @ 1.3.6
+   from url: https://grafana.com/api/plugins/grafana-piechart-panel/versions/1.3.6/download
+   into: /var/lib/grafana/plugins
+   
+   ✔ Installed grafana-piechart-panel successfully 
+   
+   Restart grafana after installing plugins . <service grafana-server restart>
+   ```
+
+   
+
+3. 退出容器
+
+   ```
+   exit
+   ```
+
+   
+
+4. 重新启动 Grafana 容器
+
+   ```
+   docker restart grafana
+   ```
+
+   
+
+#### 添加本项目提供的JSON仪表盘
+
+1. 打开 [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0/BECS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E9%9D%A2%E6%9D%BF.json)
+
+2. 进入 Grafana 面板，点击左边工具栏的 + 号图标，选择 Import
+
+   ![import](.\pics\grafana\8.jpg)
+
+3. 拷贝  [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0/BECS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E9%9D%A2%E6%9D%BF.json) 到如图所示位置，然后点击 Load
+
+   ![loadjson](.\pics\grafana\9.jpg)
+
+4. 之后请自行设置；在运行一段时间后将会出现监控数据，有关 Grafana 的更多用法请自行学习
