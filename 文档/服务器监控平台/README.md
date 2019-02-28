@@ -524,3 +524,30 @@ ufw allow 3000 && ufw allow 9090 && ufw allow 9100
 
 ### 初次使用
 
+1. 进入 SeverIP:3000 出现以下界面
+
+   ![grafana_login](.\pics\grafana_login.jpg)
+
+2. 初始用户名以及密码均为admin，登陆过后Grafana将提示我们修改密码
+
+   ![changepwd](.\pics\change_pwd.jpg)
+
+3. 点击 Save 后将进入 Home Dashboard 界面
+
+   ![homepage](.\pics\homepage.jpg)
+
+### 添加数据源
+
+Granafa将从数据源获取数据并将其可视化，所以必须要添加一个数据源才能正常使用Grafana，在此我们使用的是 Prometheus 作为系统监控的数据源，并使用 Node Exporter 对数据导出为我们需要的数据，然后Grafana将会对其进行可视化。
+
+1. 点击Home Dashboard中的 Add data source
+
+   ![datasrc1](.\pics\datasource\1.jpg)
+
+2. 选择 Prometheus
+
+   ![datasrc2](.\pics\datasource\2.jpg)
+
+3. 出现如图所示页面，开始进行详细配置
+
+   ![datasrc3](.\pics\datasource\3.png)
