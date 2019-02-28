@@ -458,7 +458,7 @@ Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
 
 搭建成功后效果如图所示：
 
-![dashboard](.\pics\dashboard.jpg)
+![dashboard](./pics/dashboard.jpg)
 
 ## 放通防火墙
 
@@ -584,7 +584,7 @@ ip a | grep docker0
 
    http://ServerIP:9090/targets
 
-   ![pro-jobs](.\pics\prometheus\jobs.jpg)
+   ![pro-jobs](./pics/prometheus/jobs.jpg)
 
 6. 如果为 DOWN 则配置错误，请检查防火墙状态以及在第2步填写的IP地址、端口号是否有误
 
@@ -594,25 +594,25 @@ ip a | grep docker0
 
 1. 进入 SeverIP:3000 出现以下界面
 
-   ![grafana_login](.\pics\grafana\1.jpg)
+   ![grafana_login](./pics/grafana/1.jpg)
 
 2. 初始用户名以及密码均为admin，登陆过后Grafana将提示我们修改密码
 
-   ![changepwd](.\pics\grafana\2.jpg)
+   ![changepwd](./pics/grafana/2.jpg)
 
 3. 点击 Save 后将进入 Home Dashboard 界面
 
-   ![homepage](.\pics\grafana\3.jpg)
+   ![homepage](./pics/grafana/3.jpg)
 
 ### 添加数据源
 
 1. 点击Home Dashboard中的 Add data source
 
-   ![datasrc1](.\pics\grafana\4.jpg)
+   ![datasrc1](./pics/grafana/4.jpg)
 
 2. 选择 Prometheus
 
-   ![datasrc2](.\pics\grafana\5.jpg)
+   ![datasrc2](./pics/grafana/5.jpg)
 
 3. 出现如图所示页面，开始进行详细配置
 
@@ -624,7 +624,7 @@ ip a | grep docker0
 
 4. 点击 Save & Test 按钮，Grafana 将会检测是否能够成功抓取数据。如果完全按照本文档步骤的话是能够成功抓取的，如果不能成功抓取，请仔细参考本一级标题下的二级标题“配置 Prometheus 与 Node Exporter”中的内容。以下为成功后显示的消息：
 
-   ![success](.\pics\grafana\7.jpg)
+   ![success](./pics/grafana/7.jpg)
 
 ### 添加本项目提供的JSON仪表盘
 
@@ -682,10 +682,10 @@ ip a | grep docker0
 
 2. 进入 Grafana 面板，点击左边工具栏的 + 号图标，选择 Import
 
-   ![import](.\pics\grafana\8.jpg)
+   ![import](./pics/grafana/8.jpg)
 
 3. 拷贝  [**BECS 服务器节点监控面板.json**](https://github.com/hitwh-vegetable-group/BECS/blob/master/%E6%96%87%E6%A1%A3/%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0/BECS%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%8A%82%E7%82%B9%E7%9B%91%E6%8E%A7%E9%9D%A2%E6%9D%BF.json) 到如图所示位置，然后点击 Load
 
-   ![loadjson](.\pics\grafana\9.jpg)
+   ![loadjson](./pics/grafana/9.jpg)
 
 4. 之后请自行设置；在运行一段时间后将会出现监控数据，有关 Grafana 的更多用法请自行学习
