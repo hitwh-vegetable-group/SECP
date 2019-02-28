@@ -20,6 +20,10 @@ Caution:
 
   *具体名称见课程设计报告
 
+## Git 常用指令速查表
+
+![git_commands](F:/%5BGithub%5DProjects/BECS/gitcommands.jpg)
+
 ## 简介
 
 这是大学第三年软件工程课程设计项目*
