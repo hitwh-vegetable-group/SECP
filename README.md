@@ -22,7 +22,7 @@ Caution:
 
 ## Git 常用指令速查表
 
-![git_commands](F:/%5BGithub%5DProjects/BECS/gitcommands.jpg)
+![git_commands](./gitcommands.jpg)
 
 ## 简介
 
