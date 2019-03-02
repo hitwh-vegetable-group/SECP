@@ -4,6 +4,26 @@
 
 Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
 
+
+
+# 版权 Copyright
+
+Copyright 2019 ® [HITwh Vegetable Group](https://github.com/hitwh-vegetable-group)
+
+## 中文
+
+本作品采用知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议进行许可。
+
+要查看该许可协议，可访问 http://creativecommons.org/licenses/by-nc-sa/4.0/ 或者写信到 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA。
+
+## English
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
+
+To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+
+
 # 镜像编译
 
 基于Docker镜像搭建服务器节点资源监视平台，实现弹性分配
@@ -488,12 +508,15 @@ ufw allow 3000 && ufw allow 9090 && ufw allow 9100
    #!/bin/sh
      
    #Promethus
+   echo "Running Prometheus v2.5 ..."
    docker run -d --restart=always -p 9090:9090 --name=prometheus hitwhvg/prometheus:v2.5
    
    #Node Exporter
+   echo "Running Node Exporter v0.17.0 ..."
    docker run -d --restart=always -p 9100:9100 --name=node-exporter hitwhvg/node-exporter:v0.17.0
    
    #Grafana
+   echo "Running Grafana v5.4.0 ..."
    docker run -d --restart=always -p 3000:3000 --name=grafana hitwhvg/grafana:v5.4.0
    ```
 
@@ -559,7 +582,7 @@ ip a | grep docker0
    ```yaml
      - job_name: node_exporter
        static_configs:
-         - targets: ['127.0.0.1:9100']
+         - targets: ['172.17.0.1:9100']
    ```
 
    
