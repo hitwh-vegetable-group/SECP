@@ -123,3 +123,11 @@ Caution: This project is still under development
 4. 利用群里提供的 BECS AES加密器 加密敏感文档，会生成一个.tmp文件
 5. 删除源文件，去掉加密文档的.tmp后缀
 6. commit 更改
+
+### 目前需加密文档（重要）
+
+**如果修改了以下文件中的一个或者多个，一定要记住在commit之前加密，否则将强制重建远程仓库，后果是丢失所有commit和branch**
+
+- [ ] .\doc\Kubernetes部署\environment.sh
+- [ ] .\doc\Kubernetes部署\hosts_append
+- [ ] .\doc\后端基础环境部署\项目服务器文档.md

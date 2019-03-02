@@ -2,17 +2,37 @@
 
 文档作者: HITwh Vegetable Group :: ArHShRn
 
-# 服务器后端环境部署
+
+
+# 版权 Copyright
+
+Copyright 2019 ® [HITwh Vegetable Group](https://github.com/hitwh-vegetable-group)
+
+## 中文
+
+本作品采用知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议进行许可。
+
+要查看该许可协议，可访问 http://creativecommons.org/licenses/by-nc-sa/4.0/ 或者写信到 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA。
+
+## English
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
+
+To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+
+
+# 服务器后端基础环境部署
 
 *为了去除sudo的复杂性，所有操作均在ROOT用户下执行*
 
-- [x] APT 换清华大学源以及软件更新
-- [x] Golang 环境配置
-- [x] Docker 环境配置
-- [ ] etcd 环境配置
-- [ ] Kubernetes 环境配置
+- [x] APT 换清华大学源以及软件更新（可选）
+- [x] Golang - 1.12 环境配置
+- [x] Docker - 18.09.2 环境配置
 
-## APT 换清华大学源以及软件更新
+
+
+## APT 换清华大学源以及软件更新（可选）
 
 1. 进入apt源列表文件夹
 
@@ -23,7 +43,7 @@
 2. 备份原source.list
 
    ```bash
-   mv ./source.list ./source.list.origin
+   mv ./sources.list ./sources.list.origin
    ```
 
 3. 进入[清华大学开源软件镜像站](https://mirror.tuna.tsinghua.edu.cn/help/ubuntu/)
@@ -49,7 +69,7 @@
 4. 新建source.list文件并将拷贝好的文本粘贴进去，最后保存文件
 
    ```
-   vi ./source.list
+   vi ./sources.list
    ```
 
 5. 更新APT列表缓存并升级所有包
@@ -57,6 +77,8 @@
    ```bash
    apt update && apt upgrade -y
    ```
+
+
 
 ## Golang 环境配置
 
@@ -69,6 +91,7 @@
    mkdir ./golang
    cd ./golang
    wget https://studygolang.com/dl/golang/go1.12.linux-amd64.tar.gz
+   
    ```
 
    核对SHA256
@@ -94,36 +117,37 @@
 
    ```bash
    tar -zxvf ./go1.12.linux-amd64.tar.gz -C /usr/local
+   
    ```
 
 3. 编辑当前用户环境变量
 
    ```bash
    vi ~/.profile
+   
    ```
 
 4. 为GOLANG添加GOROOT GOPATH 环境变量
 
    ```bash
    export GOROOT=/usr/local/go
-   export GOPATH=/etc/gopath
+   export GOPATH=/opt/go
    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-   ```
-
    
+   ```
 
 5. 载入环境变量
 
    ```bash
    source ~/.profile
-   ```
-
    
+   ```
 
 6. 查看Golang版本以检查Golang是否成功配置完成
 
    ```bash
    go version
+   
    ```
 
    
@@ -135,17 +159,17 @@
 
 ```bash
 apt remove -y docker docker-ce docker-engine docker.io containerd runc
+
 ```
 
 删除包括所有配置文件
 
 ```
 apt purge -y docker docker-ce docker-engine docker.io containerd runc
+
 ```
 
-
-
-###获取并安装DOCKER-CE
+###获取并安装DOCKER-CE 18.09.2
 
 1. 获取Containerd、Docker CE CLI以及Docker CE（注意，安装顺序也如此）
 
@@ -156,9 +180,8 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
    wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/containerd.io_1.2.2-3_amd64.deb
    wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce-cli_18.09.2~3-0~ubuntu-xenial_amd64.deb
    wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_18.09.2~3-0~ubuntu-xenial_amd64.deb
-   ```
-
    
+   ```
 
 2. 安装获取的三个包
 
@@ -166,20 +189,21 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
    dpkg -i ./containerd.io_1.2.2-3_amd64.deb
    dpkg -i ./docker-ce-cli_18.09.2~3-0~ubuntu-xenial_amd64.deb
    dpkg -i ./docker-ce_18.09.2~3-0~ubuntu-xenial_amd64.deb
-   ```
-
    
+   ```
 
 3. 启动Docker服务
 
    ```bash
    systemctl restart docker
+   
    ```
 
 4. 查看Docker版本以检查Docker是否成功配置完成
 
    ```
    docker version
+   
    ```
 
    期望的输出
@@ -205,6 +229,8 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
      Experimental:     false
    ```
 
+
+
 ### 解决PULL镜像速度过慢的问题
 
 #### Docker 中国官方镜像
@@ -217,6 +243,7 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
 
 ```
 docker pull registry.docker-cn.com/library/ubuntu:16.04
+
 ```
 
 #### 配置 Docker 守护进程
@@ -227,7 +254,8 @@ docker pull registry.docker-cn.com/library/ubuntu:16.04
 
 ```json
 {
-  "registry-mirrors": ["https://registry.docker-cn.com"]
+  "registry-mirrors": ["https://registry.docker-cn.com", "https://hub-mirror.c.163.com", "https://docker.mirrors.ustc.edu.cn"],
+  "max-concurrent-downloads": 20
 }
 ```
 
