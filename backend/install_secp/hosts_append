@@ -1,0 +1,6 @@
+
+# 此段由SECP Cloud生成,包含所有节点信息
+# SECP Cloud Hosts
+192.168.200.131 secp_master secp_master
+192.168.200.134 secp_node1 secp_node1
+192.168.200.135 secp_node2 secp_node2
