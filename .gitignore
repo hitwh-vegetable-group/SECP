@@ -1,3 +1,10 @@
 # HITwhVG Images and Utils
 *.tar
 *.tar.gz
+*.deb
+*.tgz
+
+# Pre-downloaded contents
+cfssl
+cfssl-certinfo
+cfssljson
