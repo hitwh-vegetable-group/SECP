@@ -2,6 +2,7 @@
 *.tar
 *.tar.gz
 *.deb
+*.tgz
 
 # Pre-downloaded contents
 cfssl
