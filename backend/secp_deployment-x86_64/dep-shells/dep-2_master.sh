@@ -1,75 +1,67 @@
+# License: GNU AGPL v3.0
+# Author: HITwh Vegetable Group :: ArHShRn
+
 #!/bin/sh
 #set -o errexit
 
-echo "-----------------------------------------------------"
-echo "欢迎使用SECP Cloud环境部署脚本 - 用户"
-echo "在Ansible做成之前，您将持续使用此脚本配置后台基本环境"
-echo "-----------------------------------------------------"
-echo "正在配置环境..."
+echo ">>  -----------------------------------------------------"
+echo ">>         欢迎使用 SECP Cloud 服务器集群部署脚本"
+echo ">>  在Ansible做成之前，您将持续使用此脚本配置后台基本环境"
+echo ">>  -----------------------------------------------------"
+echo ">>  正在配置环境..."
 echo ">>  非第一次配置时尝试清理Docker..."
 apt purge -y docker docker-ce docker-engine docker.io containerd runc
 
 # -----------------------------------------------------
 # 授权免密登录其他节点
-echo "\n>>  生成RSA证书用于免密登陆部署其他节点..."
+echo ">>  生成RSA证书用于免密登陆部署其他节点..."
 ssh-keygen -t rsa
-echo "\n>>  配置 Master 节点的 root 免密登录..."
+echo ">>  配置 Master 节点的 root 免密登录..."
 ssh-copy-id root@secp-master
-echo "\n>>  配置 Node1 节点的 root 免密登录..."
+echo ">>  配置 Node1 节点的 root 免密登录..."
 ssh-copy-id root@secp-node1
-echo "\n>>  配置 Node2 节点的 root 免密登录..."
+echo ">>  配置 Node2 节点的 root 免密登录..."
 ssh-copy-id root@secp-node2
-
 # -----------------------------------------------------
-# 分发节点初始化脚本
-echo "\n>>  分发 node_runner-env 文件到每个节点..."
-
-source environment.sh
-for node_ip in ${NODE_IPS[@]}
-  do
-    echo ">>> 对节点 root@${node_ip} 分发 node_runner-env"
-	mkdir -p /home/install_secp
-    scp /home/install_secp/* root@${node_ip}:/home/install_secp
-    ssh root@${node_ip} "cd /home/install_secp && chmod +x ./*.sh && ./setup_node_runner-env.sh"
-  done
-
-# -----------------------------------------------------
+# dep-node_runner-env.sh 运行于此
 # 分发节点环境配置脚本
-echo "\n>>  分发环境配置脚本到每个节点..."
-source environment.sh
+echo ">>  分发部署脚本..."
+source /opt/secp_deployment-x86_64/dep-shells/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
-    echo ">>> 对节点 root@${node_ip} 分发 environment.sh"
-    scp environment.sh root@${node_ip}:/opt/k8s/bin/
-    ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
+    echo ">>> 对节点 root@${node_ip}"
+	ssh root@${node_ip} "mkdir -p /opt/secp_deployment-x86_64/dep-shells"
+    scp ${SECP_DEP_SHELLS}/* root@${node_ip}:${SECP_DEP_SHELLS}
+    ssh root@${node_ip} "cd /opt/secp_deployment-x86_64/dep-shells && chmod +x ./*.sh && ./dep-node_runner-env.sh"
   done
+
+# -----------------------------------------------------  
+# 部署 golang
+#echo ">>  部署 golang ..."
+#source /opt/secp_deployment-x86_64/dep-shells/environment.sh
+#for node_ip in ${NODE_IPS[@]}
+#  do
+#    echo ">>> 对节点 root@${node_ip}"
+#	ssh root@${node_ip} "source /opt/secp_deployment-x86_64/dep-shells/environment.sh"
+#    scp ${SECP_DEP_GOLANG}/* root@${node_ip}:${SECP_DEP_GOLANG}
+#    ssh root@${node_ip} "tar -zxvf ${SECP_DEP_GOLANG}/hitwhvg-golang-utils.tar.gz -C /opt/k8s/bin"
+#	go version
+#  done
 
 # -----------------------------------------------------
 # 签署 CA 根域名证书
-echo "\n>>  签署 CA 根域名证书..."
+echo ">>  签署 CA 根域名证书..."
 mkdir -p /opt/k8s/cert
-cd /opt/k8s/bin
 
-echo "\n>>  请上传CFSSL工具集."
-rz
-
-#echo "\n>>  获取CFSSL工具集..."
-#wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
-#mv cfssl_linux-amd64 /opt/k8s/bin/cfssl
-
-#wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
-#mv cfssljson_linux-amd64 /opt/k8s/bin/cfssljson
-
-#wget https://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64
-#mv cfssl-certinfo_linux-amd64 /opt/k8s/bin/cfssl-certinfo
+source /opt/secp_deployment-x86_64/dep-shells/environment.sh
+cp ${SECP_DEP_CFSSL}/cfssl /opt/k8s/bin/cfssl
+cp ${SECP_DEP_CFSSL}/cfssljson /opt/k8s/bin/cfssljson
+cp ${SECP_DEP_CFSSL}/cfssl-certinfo /opt/k8s/bin/cfssl-certinfo
 
 cd /opt/k8s/
 chmod +x /opt/k8s/bin/*
 export PATH=/opt/k8s/bin:$PATH
 
-#TODOS
-# profiles: hitwhvg-secp
-# user: root
 cat > ca-config.json <<EOF
 {
   "signing": {
@@ -110,32 +102,28 @@ cat > ca-csr.json <<EOF
 }
 EOF
 
-echo "\n>>  生成证书..."
+echo ">>  生成证书..."
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca
-echo "\n>>  生成证书结果如下:"
-ls ca*
 
-echo "\n>>  分发 CA 根域名证书..."
-source /opt/k8s/bin/environment.sh
+echo ">>  分发 CA 根域名证书..."
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
-    echo ">>> 对节点 root@${node_ip} 分发 CA 根域名证书..."
+    echo ">>> 对节点 root@${node_ip}"
     ssh root@${node_ip} "mkdir -p /etc/kubernetes/cert"
     scp ca*.pem ca-config.json root@${node_ip}:/etc/kubernetes/cert
   done
 
 # -----------------------------------------------------  
 # 部署 kubectl
-echo "\n>>  部署 kubectl..."
-cd /home/k8s
-tar -zxvf hitwhvg-kubernetes-utils.tar.gz
+echo ">>  部署 kubectl..."
+tar -zxvf ${SECP_DEP_K8S}/hitwhvg-kubernetes-utils.tar.gz -C ${SECP_DEP_K8S}
 
 echo "\n>>  分发 kubectl..."
-source /opt/k8s/bin/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 kubectl..."
-    scp ./kubectl root@${node_ip}:/opt/k8s/bin/
+    scp ${SECP_DEP_K8S}/kubectl root@${node_ip}:/opt/k8s/bin/
     ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
   done
   
@@ -166,11 +154,9 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -ca-key=/etc/kubernetes/cert/ca-key.pem \
   -config=/etc/kubernetes/cert/ca-config.json \
   -profile=hitwhvg-secp admin-csr.json | cfssljson -bare admin
-echo "\n>>  生成证书结果如下:"
-ls admin*
 
 echo "\n>>  配置 kubeconfig ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 # 设置集群参数
 kubectl config set-cluster kubernetes \
   --certificate-authority=/etc/kubernetes/cert/ca.pem \
@@ -192,7 +178,7 @@ kubectl config set-context kubernetes \
 kubectl config use-context kubernetes --kubeconfig=kubectl.kubeconfig
 
 echo "\n>>  分发 kubeconfig ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 kubeconfig..."
@@ -203,15 +189,14 @@ for node_ip in ${NODE_IPS[@]}
 # -----------------------------------------------------  
 # 部署 ETCD  
 echo "\n>>  部署 etcd 集群..."
-cd /home/etcd
-tar -zxvf hitwhvg-etcd-utils.tar.gz
+tar -zxvf ${SECP_DEP_ETCD}/hitwhvg-etcd-utils.tar.gz -C ${SECP_DEP_ETCD}
 
 echo "\n>>  分发 etcd 组件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 etcd 组件..."
-    scp ./etcd* root@${node_ip}:/opt/k8s/bin
+    scp ${SECP_DEP_ETCD}/etcd* root@${node_ip}:/opt/k8s/bin
     ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
   done
   
@@ -250,11 +235,9 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
     -ca-key=/etc/kubernetes/cert/ca-key.pem \
     -config=/etc/kubernetes/cert/ca-config.json \
     -profile=hitwhvg-secp etcd-csr.json | cfssljson -bare etcd
-echo "\n>>  生成证书结果如下:"
-ls etcd*
 
 echo "\n>>  分发证书..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发证书..."
@@ -263,7 +246,7 @@ for node_ip in ${NODE_IPS[@]}
   done
   
 echo "\n>>  创建 etcd.service 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > etcd.service.template <<EOF
 [Unit]
 Description=Etcd Server
@@ -302,15 +285,14 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for (( i=0; i < 3; i++ ))
   do
     sed -e "s/##NODE_NAME##/${NODE_NAMES[i]}/" -e "s/##NODE_IP##/${NODE_IPS[i]}/" etcd.service.template > etcd-${NODE_IPS[i]}.service 
   done
-ls *.service
 
 echo "\n>>  分发 etcd.service 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 etcd.service 服务..."
@@ -319,23 +301,28 @@ for node_ip in ${NODE_IPS[@]}
   done
 
 echo "\n>>  启动 etcd ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
+cat > ./start_etcd.sh <<EOF
+systemctl daemon-reload && systemctl enable etcd && systemctl restart etcd
+EOF
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 执行操作中,由于要重新加载系统守护者，所以过程缓慢，请耐心等待..."
-    ssh root@${node_ip} "systemctl daemon-reload && systemctl enable etcd && systemctl restart etcd&"
+	scp ./start_etcd.sh root@${node_ip}:/opt/k8s/bin
+    ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
+	ssh root@${node_ip} "bash /opt/k8s/bin/start_etcd.sh&"
   done
-  
+rm -rf ./start_etcd.sh
+
 echo "\n>>  睡眠5s后再发起 etcd 集群状态查询..."
-sleep 5
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 节点 root@${node_ip} 的 etcd 服务状态如下:"
     ssh root@${node_ip} "systemctl status etcd|grep Active"
   done
   
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> etcd 集群状态如下:"
@@ -349,15 +336,14 @@ for node_ip in ${NODE_IPS[@]}
 # -----------------------------------------------------    
 # 部署 flanneld
 echo "\n>>  部署 flanneld ..."
-cd /home/flanneld
-tar -zxvf hitwhvg-flanneld-utils.tar.gz
+tar -zxvf ${SECP_DEP_FLANNELD}/hitwhvg-flanneld-utils.tar.gz -C ${SECP_DEP_FLANNELD}
 
 echo "\n>>  分发 FLANNELD ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 FLANNELD ..."
-    scp ./{flanneld,mk-docker-opts.sh} root@${node_ip}:/opt/k8s/bin/
+    scp ${SECP_DEP_FLANNELD}/{flanneld,mk-docker-opts.sh} root@${node_ip}:/opt/k8s/bin/
     ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
   done
 
@@ -388,11 +374,9 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -ca-key=/etc/kubernetes/cert/ca-key.pem \
   -config=/etc/kubernetes/cert/ca-config.json \
   -profile=hitwhvg-secp flanneld-csr.json | cfssljson -bare flanneld
-echo "\n>>  生成证书结果如下:"
-ls flanneld*pem
 
 echo "\n>>  分发 FLANNELD 证书..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 FLANNELD 证书..."
@@ -401,7 +385,7 @@ for node_ip in ${NODE_IPS[@]}
   done
   
 echo "\n>>  检视状态..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 etcdctl \
   --endpoints=${ETCD_ENDPOINTS} \
   --ca-file=/etc/kubernetes/cert/ca.pem \
@@ -410,7 +394,7 @@ etcdctl \
   set ${FLANNEL_ETCD_PREFIX}/config '{"Network":"'${CLUSTER_CIDR}'", "SubnetLen": 24, "Backend": {"Type": "vxlan"}}'
   
 echo "\n>>  创建 flanneld.service 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 export IFACE=${VIP_IF}
 cat > flanneld.service << EOF
 [Unit]
@@ -439,7 +423,7 @@ RequiredBy=docker.service
 EOF
 
 echo "\n>>  分发 flanneld.service 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 flanneld.service 服务..."
@@ -447,7 +431,7 @@ for node_ip in ${NODE_IPS[@]}
   done
   
 echo "\n>>  启动 FLANNELD ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
@@ -455,30 +439,14 @@ for node_ip in ${NODE_IPS[@]}
   done
   
 echo "\n>>  检视 FLANNELD 状态..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 节点 root@${node_ip} 的 FLANNELD 服务状态如下:"
     ssh root@${node_ip} "systemctl status flanneld|grep Active"
   done
-  
-source /opt/k8s/bin/environment.sh
-etcdctl \
-  --endpoints=${ETCD_ENDPOINTS} \
-  --ca-file=/etc/kubernetes/cert/ca.pem \
-  --cert-file=/etc/flanneld/cert/flanneld.pem \
-  --key-file=/etc/flanneld/cert/flanneld-key.pem \
-  get ${FLANNEL_ETCD_PREFIX}/config
-  
-source /opt/k8s/bin/environment.sh
-etcdctl \
-  --endpoints=${ETCD_ENDPOINTS} \
-  --ca-file=/etc/kubernetes/cert/ca.pem \
-  --cert-file=/etc/flanneld/cert/flanneld.pem \
-  --key-file=/etc/flanneld/cert/flanneld-key.pem \
-  ls ${FLANNEL_ETCD_PREFIX}/subnets
-  
-source /opt/k8s/bin/environment.sh
+ 
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> ${node_ip}"
@@ -488,26 +456,25 @@ for node_ip in ${NODE_IPS[@]}
 # -----------------------------------------------------
 # 部署Master节点
 echo "\n>>  部署 Master 节点..."
-cd /home/k8s
-mkdir ./server
-mv kube-apiserver kube-scheduler kube-controller-manager ./server
-
 echo "\n>>  正在分发 Kubernetes 服务端二进制文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 Kubernetes 服务端二进制文件..."
-    scp ./server/* root@${node_ip}:/opt/k8s/bin/
-	scp /home/k8s/kubeadm root@${node_ip}:/opt/k8s/bin
-	scp /home/k8s/kubelet root@${node_ip}:/opt/k8s/bin
-	scp /home/k8s/kube-proxy root@${node_ip}:/opt/k8s/bin
+    scp ${SECP_DEP_K8S}/kube-apiserver \
+        ${SECP_DEP_K8S}/kube-scheduler \
+        ${SECP_DEP_K8S}/kube-controller-manager \
+        ${SECP_DEP_K8S}/kubeadm \
+        ${SECP_DEP_K8S}/kubelet \
+        ${SECP_DEP_K8S}/kube-proxy \
+        root@${node_ip}:/opt/k8s/bin/
     ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
   done
 
 # -----------------------------------------------------
 # 部署 HA 服务
 echo "\n>>  部署 HA 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 安装 KeepAlived 以及 HAProxy..."
@@ -556,7 +523,7 @@ listen kube-master
 EOF
 
 echo "\n>>  分发 HAProxy 配置文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 HAProxy 配置文件..."
@@ -567,7 +534,7 @@ for node_ip in ${NODE_IPS[@]}
 echo "\n>>  生成 KeepAlived - Master 配置文件..."
 cd /opt/k8s
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat  > keepalived-master.conf <<EOF
 global_defs {
     router_id becp_cloud
@@ -598,7 +565,7 @@ EOF
 echo "\n>>  生成 KeepAlived - Backup 配置文件..."
 cd /opt/k8s
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat  > keepalived-backup.conf <<EOF
 global_defs {
     router_id becp_cloud-backup
@@ -632,24 +599,15 @@ scp keepalived-backup.conf root@192.168.200.134:/etc/keepalived/keepalived.conf
 scp keepalived-backup.conf root@192.168.200.135:/etc/keepalived/keepalived.conf
 
 echo "\n>>  启动 HAProxy ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 启动 HAProxy 服务..."
     ssh root@${node_ip} "systemctl restart haproxy"
   done
 
-echo "\n>>  检视 HAProxy 状态..."
-source /opt/k8s/bin/environment.sh
-for node_ip in ${NODE_IPS[@]}
-  do
-    echo ">>> 对节点 root@${node_ip} 检视 HAProxy 状态..."
-    ssh root@${node_ip} "systemctl status haproxy|grep Active"
-	ssh root@${node_ip} "netstat -lnpt|grep haproxy"
-  done
-
 echo "\n>>  启动 KeepAlived ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 启动 KeepAlived 服务..."
@@ -657,13 +615,11 @@ for node_ip in ${NODE_IPS[@]}
   done
 
 echo "\n>>  检视 KeepAlived 状态..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 检视 KeepAlived 状态..."
     ssh root@${node_ip} "systemctl status keepalived|grep Active"
-	ssh root@${node_ip} "ip addr show ${VIP_IF}"
-    ssh root@${node_ip} "ping -c 1 ${MASTER_VIP}"
   done
 
 # -----------------------------------------------------
@@ -672,7 +628,7 @@ echo "\n>>  部署 kube-apiserver ..."
 # 创建 kubernetes 证书
 echo "\n>>  创建证书..."
 cd /opt/k8s
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kubernetes-csr.json <<EOF
 {
   "CN": "kubernetes",
@@ -714,20 +670,18 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -ca-key=/etc/kubernetes/cert/ca-key.pem \
   -config=/etc/kubernetes/cert/ca-config.json \
   -profile=hitwhvg-secp kubernetes-csr.json | cfssljson -bare kubernetes
-echo "\n>>  生成证书结果如下:"
-ls kubernetes*pem
 
 echo "\n>>  分发证书..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发证书..."
     ssh root@${node_ip} "mkdir -p /etc/kubernetes/cert/"
     scp kubernetes*.pem root@${node_ip}:/etc/kubernetes/cert/
   done
-  
+
 echo "\n>>  创建加密配置文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > encryption-config.yaml <<EOF
 kind: EncryptionConfig
 apiVersion: v1
@@ -743,15 +697,15 @@ resources:
 EOF
 
 echo "\n>>  分发加密配置文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发加密配置文件..."
     scp encryption-config.yaml root@${node_ip}:/etc/kubernetes/
   done
-  
+
 echo "\n>>  创建 kube-apiserver.service 服务配置..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kube-apiserver.service.template <<EOF
 [Unit]
 Description=Kubernetes API Server
@@ -803,39 +757,38 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for (( i=0; i < 3; i++ ))
   do
     sed -e "s/##NODE_NAME##/${NODE_NAMES[i]}/" -e "s/##NODE_IP##/${NODE_IPS[i]}/" kube-apiserver.service.template > kube-apiserver-${NODE_IPS[i]}.service 
   done
-ls kube-apiserver*.service
 
 echo "\n>>  分发 kube-apiserver.service 服务配置..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 分发 kube-apiserver.service 服务配置..."
     ssh root@${node_ip} "mkdir -p /var/log/kubernetes"
     scp kube-apiserver-${node_ip}.service root@${node_ip}:/etc/systemd/system/kube-apiserver.service
   done
- 
+
 echo "\n>>  启动 kube-apiserver.service..." 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
-    echo ">>> 对节点 root@${node_ip} 操作中..."
+    echo ">>> 对节点 root@${node_ip} 启动 kube-apiserver.service..."
     ssh root@${node_ip} "systemctl daemon-reload && systemctl enable kube-apiserver && systemctl restart kube-apiserver"
   done
 
 echo "\n>>  检视 kube-apiserver.service 服务运行状态..."   
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 节点 root@${node_ip} 的服务状态如下:"
     ssh root@${node_ip} "systemctl status kube-apiserver |grep 'Active:'"
   done
-  
-#source /opt/k8s/bin/environment.sh
+
+#source ${SECP_DEP_SHELLS}/environment.sh
 #ETCDCTL_API=3 etcdctl \
 #    --endpoints=${ETCD_ENDPOINTS} \
 #    --cacert=/etc/kubernetes/cert/ca.pem \
@@ -847,13 +800,13 @@ echo ">>  现在请检查集群信息！"
 kubectl cluster-info
 kubectl get all --all-namespaces
 kubectl get componentstatuses
+sleep 1
 
 echo ">>  授予 kubernetes 证书访问 kubelet API 的权限..."
 kubectl create clusterrolebinding \
   kube-apiserver:kubelet-apis \
   --clusterrole=system:kubelet-api-admin \
   --user kubernetes
-echo ">>  SECP Cloud 用户环境部署脚本部署完成！"
 
 # -----------------------------------------------------
 # 部署 kube-controller-manager
@@ -895,7 +848,7 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -profile=hitwhvg-secp kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
   
 echo ">>  分发证书..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
@@ -903,7 +856,7 @@ for node_ip in ${NODE_IPS[@]}
   done
 
 echo ">>  创建并分发 kubeconfig 文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 kubectl config set-cluster kubernetes \
   --certificate-authority=/etc/kubernetes/cert/ca.pem \
   --embed-certs=true \
@@ -919,15 +872,15 @@ kubectl config set-context system:kube-controller-manager \
   --user=system:kube-controller-manager \
   --kubeconfig=kube-controller-manager.kubeconfig
 kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     scp kube-controller-manager.kubeconfig root@${node_ip}:/etc/kubernetes/
   done
-  
+
 echo ">>  创建并分发 kube-controller-manager systemd unit 文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kube-controller-manager.service <<EOF
 [Unit]
 Description=Kubernetes Controller Manager
@@ -966,30 +919,29 @@ User=root
 [Install]
 WantedBy=multi-user.target
 EOF
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     scp kube-controller-manager.service root@${node_ip}:/etc/systemd/system/
   done
-  
+
 echo ">>  启动 kube-controller-manager 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
-    echo ">>> 对节点 root@${node_ip} 操作中..."
+    echo ">>> 对节点 root@${node_ip} 启动 kube-controller-manager 服务..."
     ssh root@${node_ip} "mkdir -p /var/log/kubernetes"
     ssh root@${node_ip} "systemctl daemon-reload && systemctl enable kube-controller-manager && systemctl restart kube-controller-manager"
   done
- 
+
 echo ">>  检查 kube-controller-manager 服务运行状态..." 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     ssh root@${node_ip} "systemctl status kube-controller-manager|grep Active"
   done
-netstat -lnpt|grep kube-controll
 
 echo ">>  查看当前的 leader..."
 kubectl get endpoints kube-controller-manager --namespace=kube-system  -o yaml
@@ -1038,7 +990,7 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -profile=hitwhvg-secp kube-scheduler-csr.json | cfssljson -bare kube-scheduler
   
 echo ">>  分发证书..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
@@ -1046,7 +998,7 @@ for node_ip in ${NODE_IPS[@]}
   done
 
 echo ">>  创建并分发 kubeconfig 文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 kubectl config set-cluster kubernetes \
   --certificate-authority=/etc/kubernetes/cert/ca.pem \
   --embed-certs=true \
@@ -1062,15 +1014,15 @@ kubectl config set-context system:kube-scheduler \
   --user=system:kube-scheduler \
   --kubeconfig=kube-scheduler.kubeconfig
 kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     scp kube-scheduler.kubeconfig root@${node_ip}:/etc/kubernetes/
   done
-  
+
 echo ">>  创建并分发 kube-scheduler systemd unit 文件..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kube-scheduler.service <<EOF
 [Unit]
 Description=Kubernetes Scheduler
@@ -1092,30 +1044,29 @@ User=root
 [Install]
 WantedBy=multi-user.target
 EOF
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     scp kube-scheduler.service root@${node_ip}:/etc/systemd/system/
   done
-  
+
 echo ">>  启动 kube-scheduler 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     ssh root@${node_ip} "mkdir -p /var/log/kubernetes"
     ssh root@${node_ip} "systemctl daemon-reload && systemctl enable kube-scheduler && systemctl restart kube-scheduler"
   done
- 
+
 echo ">>  检查 kube-scheduler 服务运行状态..." 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     ssh root@${node_ip} "systemctl status kube-scheduler|grep Active"
   done
-netstat -lnpt|grep kube-sche
 
 echo ">>  查看当前的 leader..."
 kubectl get endpoints kube-scheduler --namespace=kube-system  -o yaml
@@ -1127,16 +1078,17 @@ sleep 5
 # -----------------------------------------------------
 # 部署 docker
 echo ">>  部署 docker ..."
-cd /home/docker
-tar -zxvf hitwhvg-docker-utils.tgz
+tar -zxvf ${SECP_DEP_DOCKER}/hitwhvg-docker-utils.tgz -C ${SECP_DEP_DOCKER}
 
 echo ">>  分发 docker ..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
-    scp ./docker/docker*  root@${node_ip}:/opt/k8s/bin/
+    scp ${SECP_DEP_DOCKER}/docker/docker* root@${node_ip}:/opt/k8s/bin/
     ssh root@${node_ip} "chmod +x /opt/k8s/bin/*"
+	scp ${SECP_DEP_DOCKER}/hitwhvg-containerd-utils.deb root@${node_ip}:${SECP_DEP_DOCKER}
+	ssh root@${node_ip} "dpkg -i ${SECP_DEP_DOCKER}/hitwhvg-containerd-utils.deb"
   done
 
 echo ">>  创建和分发 systemd unit 文件..."
@@ -1163,50 +1115,48 @@ KillMode=process
 WantedBy=multi-user.target
 EOF
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     scp docker.service root@${node_ip}:/etc/systemd/system/
-	ssh root@${node_ip} "iptables -P FORWARD ACCEPT && cat 'iptables -P FORWARD ACCEPT' > /etc/rc.local"
-	ssh root@${node_ip} "mkdir -p  /etc/docker/"
-	scp /home/install_secp/daemon.json root@${node_ip}:/etc/docker/daemon.json
+	ssh root@${node_ip} "/sbin/iptables -P FORWARD ACCEPT && echo '/sbin/iptables -P FORWARD ACCEPT' > /etc/rc.local"
+	ssh root@${node_ip} "mkdir -p /etc/docker/"
+	scp ${SECP_DEP_SHELLS}/daemon.json root@${node_ip}:/etc/docker/daemon.json
   done
   
 echo ">>  启动 docker 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     ssh root@${node_ip} "systemctl stop firewalld && systemctl disable firewalld"
-    ssh root@${node_ip} "iptables -F && iptables -X && iptables -F -t nat && iptables -X -t nat"
-    ssh root@${node_ip} "iptables -P FORWARD ACCEPT"
+    ssh root@${node_ip} "/sbin/iptables -F && /sbin/iptables -X && /sbin/iptables -F -t nat && /sbin/iptables -X -t nat"
+    ssh root@${node_ip} "/sbin/iptables -P FORWARD ACCEPT"
     ssh root@${node_ip} "systemctl daemon-reload && systemctl enable docker && systemctl restart docker"
     ssh root@${node_ip} 'for intf in /sys/devices/virtual/net/docker0/brif/*; do echo 1 > $intf/hairpin_mode; done'
     ssh root@${node_ip} "sysctl -p /etc/sysctl.d/kubernetes.conf"
   done
 
 echo ">>  检查服务运行状态..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> 对节点 root@${node_ip} 操作中..."
     ssh root@${node_ip} "systemctl status docker|grep Active"
   done
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> ${node_ip}"
     ssh root@${node_ip} "ip addr show flannel.1 && ip addr show docker0"
   done
-  
-echo ">>  SECP Cloud 部署完成！"
 
 # -----------------------------------------------------
 # 部署 kubelet
 echo ">>  创建 kubelet bootstrap kubeconfig 文件..."
 cd /opt/k8s
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_name in ${NODE_NAMES[@]}
   do
     echo ">>> ${node_name} 操作中..."
@@ -1242,16 +1192,16 @@ kubeadm token list --kubeconfig ~/.kube/config
 kubectl get secrets  -n kube-system
 
 echo ">>  分发 bootstrap kubeconfig 文件到所有 worker 节点..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_name in ${NODE_NAMES[@]}
   do
     echo ">>> ${node_name}"
     scp kubelet-bootstrap-${node_name}.kubeconfig root@${node_name}:/etc/kubernetes/kubelet-bootstrap.kubeconfig
   done
-  
+
 echo ">>  创建和分发 kubelet 参数配置文件..."
 cd /opt/k8s
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kubelet.config.json.template <<EOF
 {
   "kind": "KubeletConfiguration",
@@ -1289,7 +1239,7 @@ cat > kubelet.config.json.template <<EOF
   "clusterDNS": ["${CLUSTER_DNS_SVC_IP}"]
 }
 EOF
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do 
     echo ">>> ${node_ip}"
@@ -1325,7 +1275,7 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_name in ${NODE_NAMES[@]}
   do 
     echo ">>> ${node_name}"
@@ -1337,7 +1287,7 @@ echo ">>  Bootstrap Token Auth 和授予权限..."
 kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --group=system:bootstrappers
 
 echo ">>  启动 kubelet 服务..."
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> ${node_ip}"
@@ -1407,8 +1357,8 @@ EOF
 kubectl apply -f csr-crb.yaml
 
 echo "请等待三个节点的 CSR 被自动 approve..."
-echo "休息一分钟吧！"
-sleep 60
+echo "休息30秒吧！"
+sleep 30
 kubectl get csr
 kubectl get nodes
 echo "请检查节点是否 Ready ，如果否请立刻查明原因！（等待5秒...）"
@@ -1416,21 +1366,9 @@ sleep 5
 kubectl create sa kubelet-api-test
 kubectl create clusterrolebinding kubelet-api-test --clusterrole=system:kubelet-api-admin --serviceaccount=default:kubelet-api-test
 
-
-
-
-
-
-
-
-
-
-
-
 # -----------------------------------------------------
 # 部署 kube-proxy
 echo ">>  部署 kube-proxy 组件..."
-
 cd /k8s/bin
 cat > kube-proxy-csr.json <<EOF
 {
@@ -1456,9 +1394,7 @@ cfssl gencert -ca=/etc/kubernetes/cert/ca.pem \
   -config=/etc/kubernetes/cert/ca-config.json \
   -profile=hitwhvg-secp  kube-proxy-csr.json | cfssljson -bare kube-proxy
   
-  
-  
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 kubectl config set-cluster kubernetes \
   --certificate-authority=/etc/kubernetes/cert/ca.pem \
   --embed-certs=true \
@@ -1478,7 +1414,7 @@ kubectl config set-context default \
 
 kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_name in ${NODE_NAMES[@]}
   do
     echo ">>> ${node_name}"
@@ -1498,16 +1434,15 @@ metricsBindAddress: ##NODE_IP##:10249
 mode: "ipvs"
 EOF
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for (( i=0; i < 3; i++ ))
   do 
     echo ">>> ${NODE_NAMES[i]}"
     sed -e "s/##NODE_NAME##/${NODE_NAMES[i]}/" -e "s/##NODE_IP##/${NODE_IPS[i]}/" kube-proxy.config.yaml.template > kube-proxy-${NODE_NAMES[i]}.config.yaml
     scp kube-proxy-${NODE_NAMES[i]}.config.yaml root@${NODE_NAMES[i]}:/etc/kubernetes/kube-proxy.config.yaml
   done
-  
-  
-source /opt/k8s/bin/environment.sh
+
+source ${SECP_DEP_SHELLS}/environment.sh
 cat > kube-proxy.service <<EOF
 [Unit]
 Description=Kubernetes Kube-Proxy Server
@@ -1530,14 +1465,14 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_name in ${NODE_NAMES[@]}
   do 
     echo ">>> ${node_name}"
     scp kube-proxy.service root@${node_name}:/etc/systemd/system/
   done
   
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> ${node_ip}"
@@ -1545,11 +1480,31 @@ for node_ip in ${NODE_IPS[@]}
     ssh root@${node_ip} "mkdir -p /var/log/kubernetes"
     ssh root@${node_ip} "systemctl daemon-reload && systemctl enable kube-proxy && systemctl restart kube-proxy"
   done
-source /opt/k8s/bin/environment.sh
+source ${SECP_DEP_SHELLS}/environment.sh
 for node_ip in ${NODE_IPS[@]}
   do
     echo ">>> ${node_ip}"
     ssh root@${node_ip} "systemctl status kube-proxy|grep Active"
   done
-  
-echo ">>  SECP Cloud 配置完成！请用 kubectl get nodes 检查状态！"
+
+echo ">>  请等待5秒，我们将开始对每个节点分发并部署 Docker 镜像！"
+sleep 5
+
+# -----------------------------------------------------
+# 分发镜像
+echo ">>  -----------------------------------------------------"
+echo ">>         欢迎使用 SECP Cloud 环境部署脚本 - 镜像"
+echo ">>  在Ansible做成之前，您将持续使用此脚本配置后台基本环境"
+echo ">>  -----------------------------------------------------"
+
+echo ">>  对其他节点分发 SECP Cloud 基本 Docker 镜像..."
+source ${SECP_DEP_SHELLS}/environment.sh
+for node_ip in ${NODE_IPS[@]}
+  do
+	echo ">>> 拷贝镜像到 root@${node_ip} ..."
+	scp ${SECP_DEP_DOCKERIMG}/* root@${node_ip}:${SECP_DEP_DOCKERIMG}
+	ssh root@${node_ip} "chmod +x ${SECP_DEP_DOCKERIMG}/*.sh && cd ${SECP_DEP_DOCKERIMG} && ./load_images.sh"
+  done
+
+clear
+echo ">>  SECP Cloud 服务器集群配置完成！感谢使用~"

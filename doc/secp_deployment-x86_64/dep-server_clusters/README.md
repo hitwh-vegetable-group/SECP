@@ -28,7 +28,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 
 - [x] APT 换清华大学源以及软件更新（可选）
 - [x] Golang - 1.12 环境配置
-- [x] Docker - 18.09.2 环境配置
+- [x] （过期，请不要看这一步）Docker - 18.09.2 环境配置
 
 
 
@@ -151,7 +151,11 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
    ```
 
    
-## Docker 环境配置
+## （过期，请不要看这一步）Docker 环境配置
+
+**此步已过期，保留仅作参考用途**
+
+**Docker 部署已集成至 SECP 集群部署中**
 
 ### 删除之前的安装
 

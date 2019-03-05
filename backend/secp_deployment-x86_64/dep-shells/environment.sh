@@ -1,5 +1,24 @@
 #!/usr/bin/bash
 
+# SECP Cloud 部署包路径
+export SECP_DEP=/opt/secp_deployment-x86_64
+
+export SECP_DEP_COMPONENTS=/opt/secp_deployment-x86_64/dep-components
+export SECP_DEP_SERVICES=/opt/secp_deployment-x86_64/dep-services
+export SECP_DEP_SHELLS=/opt/secp_deployment-x86_64/dep-shells
+
+export SECP_DEP_CFSSL=/opt/secp_deployment-x86_64/dep-components/cfssl
+export SECP_DEP_DOCKER=/opt/secp_deployment-x86_64/dep-components/docker
+export SECP_DEP_DOCKERIMG=/opt/secp_deployment-x86_64/dep-components/docker/images
+export SECP_DEP_ETCD=/opt/secp_deployment-x86_64/dep-components/etcd
+export SECP_DEP_FLANNELD=/opt/secp_deployment-x86_64/dep-components/flanneld
+export SECP_DEP_GOLANG=/opt/secp_deployment-x86_64/dep-components/golang
+export SECP_DEP_K8S=/opt/secp_deployment-x86_64/dep-components/kubernetes
+
+export SECP_DEP_BTPANEL=/opt/secp_deployment-x86_64/dep-services/bt-panel
+export SECP_DEP_MONITOR=/opt/secp_deployment-x86_64/dep-services/monitor
+
+
 # 生成 EncryptionConfig 所需的加密 key
 export ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
 

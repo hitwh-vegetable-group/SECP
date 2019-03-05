@@ -5,18 +5,22 @@
 #!/bin/sh
 
 echo "> Loading Kube State Metrics..."
-docker load -i hitwhvg-kube.tar
+/opt/k8s/bin/docker load -i hitwhvg-kube.tar
 
 echo "> Loading Node Exporter..."
-docker load -i hitwhvg-node-exporter.tar
+/opt/k8s/bin/docker load -i hitwhvg-node-exporter.tar
 
 echo "> Loading Addon Resizer..."
-docker load -i hitwhvg-addon-resizer.tar
+/opt/k8s/bin/docker load -i hitwhvg-addon-resizer.tar
 
 echo "> Loading Prometheus..."
 echo "  > This file is kind of big, please wait..."
-docker load -i hitwhvg-prometheus.tar
+/opt/k8s/bin/docker load -i hitwhvg-prometheus.tar
 
 echo "> Loading Grafana..."
 echo "  > This file is kind of big, please wait..."
-docker load -i hitwhvg-grafana.tar
+/opt/k8s/bin/docker load -i hitwhvg-grafana.tar
+
+echo "> Loading Pod Infra..."
+echo "  > This file is kind of big, please wait..."
+/opt/k8s/bin/docker load -i hitwhvg-pod-infra.tar
