@@ -1,24 +1,26 @@
-开源许可 GNU AGPL v3.0
+Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
 
 文档作者: HITwh Vegetable Group :: ArHShRn
 
-Grafana 仪表盘: 由StarsL.cn提供的仪表盘修改
+# 知识版权 Copyright  开源许可 License
 
+文档：版权 ® HITwh很菜的小组 2019
 
+源码（前端、后端Shell以及配置文件）：GNU AGPL v3.0 - 非商业用途、采用开源
 
-# 版权 Copyright
+Documents: Copyright ® [HITwh Vegetable Group](https://github.com/hitwh-vegetable-group) 2019 
 
-Copyright 2019 ® [HITwh Vegetable Group](https://github.com/hitwh-vegetable-group)
+Source Code(Frontend, Backend Shells and Configs): GNU AGPL v3.0 - **Noncommercial, Open Source**
 
-## 中文
+## 版权许可 - 中文
 
-本作品采用知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议进行许可。
+本作品文档采用知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议进行许可。
 
 要查看该许可协议，可访问 http://creativecommons.org/licenses/by-nc-sa/4.0/ 或者写信到 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA。
 
-## English
+## Copyright License - English
 
-This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
+Documents containing in this work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
 
 To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 

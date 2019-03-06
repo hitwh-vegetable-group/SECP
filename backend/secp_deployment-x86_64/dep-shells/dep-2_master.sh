@@ -207,9 +207,9 @@ cat > etcd-csr.json <<EOF
   "CN": "etcd",
   "hosts": [
     "127.0.0.1",
-    "192.168.200.128",
-    "192.168.200.129",
-    "192.168.200.130",
+    "192.168.200.133",
+    "192.168.200.136",
+    "192.168.200.138",
 	"secp-master",
 	"secp-node1",
 	"secp-node2"
@@ -518,9 +518,9 @@ listen kube-master
     mode tcp
     option tcplog
     balance source
-    server 192.168.200.128 192.168.200.128:6443 check inter 2000 fall 2 rise 2 weight 1
-    server 192.168.200.129 192.168.200.129:6443 check inter 2000 fall 2 rise 2 weight 1
-    server 192.168.200.130 192.168.200.130:6443 check inter 2000 fall 2 rise 2 weight 1
+    server 192.168.200.133 192.168.200.133:6443 check inter 2000 fall 2 rise 2 weight 1
+    server 192.168.200.136 192.168.200.136:6443 check inter 2000 fall 2 rise 2 weight 1
+    server 192.168.200.138 192.168.200.138:6443 check inter 2000 fall 2 rise 2 weight 1
 EOF
 
 echo "\n>>  分发 HAProxy 配置文件..."
@@ -595,9 +595,9 @@ vrrp_instance VI-kube-master {
 EOF
 
 echo "\n>>  分发 KeepAlived - Master/Backup 配置文件..."
-scp keepalived-master.conf root@192.168.200.128:/etc/keepalived/keepalived.conf
-scp keepalived-backup.conf root@192.168.200.129:/etc/keepalived/keepalived.conf
-scp keepalived-backup.conf root@192.168.200.130:/etc/keepalived/keepalived.conf
+scp keepalived-master.conf root@192.168.200.133:/etc/keepalived/keepalived.conf
+scp keepalived-backup.conf root@192.168.200.136:/etc/keepalived/keepalived.conf
+scp keepalived-backup.conf root@192.168.200.138:/etc/keepalived/keepalived.conf
 
 echo "\n>>  启动 HAProxy ..."
 source ${SECP_DEP_SHELLS}/environment.sh
@@ -636,9 +636,9 @@ cat > kubernetes-csr.json <<EOF
   "hosts": [
     "localhost",
     "127.0.0.1",
-    "192.168.200.128",
-    "192.168.200.129",
-    "192.168.200.130",
+    "192.168.200.133",
+    "192.168.200.136",
+    "192.168.200.138",
     "secp-master",
     "secp-node1",
 	"secp-node2",
@@ -823,9 +823,9 @@ cat > kube-controller-manager-csr.json <<EOF
     "hosts": [
       "localhost",
       "127.0.0.1",
-      "192.168.200.128",
-      "192.168.200.129",
-      "192.168.200.130",
+      "192.168.200.133",
+      "192.168.200.136",
+      "192.168.200.138",
       "secp-master",
       "secp-node1",
 	  "secp-node2"
@@ -965,9 +965,9 @@ cat > kube-scheduler-csr.json <<EOF
     "hosts": [
       "localhost",
       "127.0.0.1",
-      "192.168.200.128",
-      "192.168.200.129",
-      "192.168.200.130",
+      "192.168.200.133",
+      "192.168.200.136",
+      "192.168.200.138",
       "secp-master",
       "secp-node1",
 	  "secp-node2"
