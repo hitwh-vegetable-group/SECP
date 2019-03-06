@@ -17,6 +17,10 @@ echo "> Saving Prometheus..."
 echo "  > This file is kind of big, please wait..."
 /opt/k8s/bin/docker save hitwhvg/prometheus:v2.5  > hitwhvg-prometheus.tar
 
+echo "> Saving Prometheus With Node-Exporter..."
+echo "  > This file is kind of big, please wait..."
+/opt/k8s/bin/docker save hitwhvg/prom-ne:arhshrn > hitwhvg-prom-ne.tar
+
 echo "> Saving Grafana..."
 echo "  > This file is kind of big, please wait..."
 /opt/k8s/bin/docker save hitwhvg/grafana:v5.4.0  > hitwhvg-grafana.tar

@@ -45,7 +45,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 1. 利用Go从Github获取Prometheus项目
 
    ```
-   go get -v github.com/prometheus/prometheus
+   go get -d github.com/prometheus/prometheus
    ```
 
    
@@ -109,7 +109,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 1. 利用Go从Github获取项目
 
    ```
-   go get -v github.com/prometheus/node_exporter
+   go get -d github.com/prometheus/node_exporter
    ```
 
    
@@ -160,7 +160,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 1. 利用Go从Github获取项目
 
    ```
-   go get -v github.com/kubernetes/kube-state-metrics
+   go get -d github.com/kubernetes/kube-state-metrics
    ```
 
    
@@ -275,7 +275,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 1. 利用Go从Github获取项目
 
    ```
-   go get -v github.com/grafana/Grafana
+   go get -d github.com/grafana/Grafana
    ```
 
    
@@ -383,7 +383,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
    选项2：仅编译最终容器
 
    ```dockerfile
-   # Golang build container
+   # Stage 0
    FROM golang:1.11
    
    WORKDIR $GOPATH/src/github.com/grafana/grafana
@@ -403,11 +403,8 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
    
    RUN go run build.go build
    
-   # Node build container
-   FROM node:8
-   
-   WORKDIR /usr/src/app/
-   
+   RUN mkdir -p /usr/src/app/
+   RUN cd /usr/src/app/
    RUN wget https://dl.grafana.com/oss/release/grafana-5.4.0.linux-amd64.tar.gz
    RUN tar -zxvf grafana-5.4.0.linux-amd64.tar.gz grafana-5.4.0/tools
    RUN tar -zxvf grafana-5.4.0.linux-amd64.tar.gz grafana-5.4.0/public
@@ -452,8 +449,8 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
        chmod 777 "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS"
    
    COPY --from=0 /go/src/github.com/grafana/grafana/bin/linux-amd64/grafana-server /go/src/github.com/grafana/grafana/bin/linux-amd64/grafana-cli ./bin/
-   COPY --from=1 /usr/src/app/public ./public
-   COPY --from=1 /usr/src/app/tools ./tools
+   COPY --from=0 /usr/src/app/public ./public
+   COPY --from=0 /usr/src/app/tools ./tools
    COPY tools/phantomjs/render.js ./tools/phantomjs/render.js
    
    EXPOSE 3000

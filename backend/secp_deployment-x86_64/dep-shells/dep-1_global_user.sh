@@ -11,6 +11,7 @@ echo ">>  -----------------------------------------------------"
 
 echo ">>  正在配置环境..."
 cat ./hosts_append >> /etc/hosts
+cat /etc/hosts | grep secp
 echo ">>  重启网络环境..."
 systemctl restart networking
 echo ">>  SECP Cloud 用户环境部署脚本部署完成！"

@@ -190,6 +190,7 @@ apt purge -y docker docker-ce docker-engine docker.io containerd runc
 2. 安装获取的三个包
 
    ```bash
+   apt install -y libltdl7
    dpkg -i ./containerd.io_1.2.2-3_amd64.deb
    dpkg -i ./docker-ce-cli_18.09.2~3-0~ubuntu-xenial_amd64.deb
    dpkg -i ./docker-ce_18.09.2~3-0~ubuntu-xenial_amd64.deb

@@ -4,7 +4,7 @@
   
 #Promethus
 echo "Running Prometheus v2.5 ..."
-docker run -d --restart=always -p 9090:9090 --name=prometheus hitwhvg/prometheus:v2.5
+docker run -d --restart=always -p 9090:9090 --name=prometheus hitwhvg/prometheus:v2.5.0
 
 #Node Exporter
 echo "Running Node Exporter v0.17.0 ..."
