@@ -19,7 +19,7 @@ echo "  > This file is kind of big, please wait..."
 
 echo "> Loading Prometheus With Node-Exporter..."
 echo "  > This file is kind of big, please wait..."
-/opt/k8s/bin/docker load -i hitwhvg-hitwhvg-prom-ne.tar
+/opt/k8s/bin/docker load -i hitwhvg-prom-ne.tar
 
 echo "> Loading Grafana..."
 echo "  > This file is kind of big, please wait..."
