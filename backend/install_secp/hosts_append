@@ -1,6 +1,0 @@
-
-# 此段由SECP Cloud生成,包含所有节点信息
-# SECP Cloud Hosts
-192.168.200.137 secp-master secp-master
-192.168.200.134 secp-node1 secp-node1
-192.168.200.135 secp-node2 secp-node2

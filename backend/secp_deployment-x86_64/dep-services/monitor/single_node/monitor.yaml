@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hitwhvg-monitoring
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-monitor
+  namespace: hitwhvg-monitoring
+  labels:
+    name: hitwhvg
+spec:
+  containers:
+  - name: prometheus-with-ne
+    image: hitwhvg/prom-ne:arhshrn
+    imagePullPolicy: Never
+    ports:
+    - name: prom-port
+      containerPort: 9090
+      hostPort: 9090
+      nodePort: 9090
+      protocol: TCP
+  - name: grafana
+    image: hitwhvg/grafana:v5.4.0
+    imagePullPolicy: Never
+    ports:
+    - name: grafana-port
+      containerPort: 3000
+      hostPort: 3000
+      nodePort: 3000
+      protocol: TCP

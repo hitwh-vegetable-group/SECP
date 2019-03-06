@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-prometheus
+  namespace: default
+  labels:
+    name: hitwhvg
+spec:
+  containers:
+  - name: prometheus
+    image: hitwhvg/prometheus:v2.5
+    imagePullPolicy: Never
+    ports:
+    - name: prometheus-port
+      containerPort: 9090
+      hostPort: 9090
+      nodePort: 30000
+      protocol: TCP
