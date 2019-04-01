@@ -31,9 +31,9 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">欢迎登陆！</h1>
                   </div>
-                  <form class="user" method="POST" action="./login">
+                  <form class="user" id="userform" method="POST" action="./login">
                     <div class="form-group">
-                      <input type="email" name="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="用户名.">
+                      <input type="email" name="email" class="form-control form-control-user" id="exampleInputName" aria-describedby="emailHelp" placeholder="用户名.">
                     </div>
                     <div class="form-group">
                       <input type="password" name="psw" class="form-control form-control-user" id="exampleInputPassword" placeholder="密码.">
@@ -64,17 +64,62 @@
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
-
   </div>
 
   <script src="jquery.min.js"></script>
   <script src="bootstrap.bundle.min.js"></script>
   <script src="jquery.easing.min.js"></script>
   <script src="sb-admin-2.min.js"></script>
+  <script>
+      window.onload = function(){
+        var oForm = document.getElementById('userform');
+        var oUser = document.getElementById('exampleInputName');
+        var oPswd = document.getElementById('exampleInputPassword');
+        var oRemember = document.getElementById('rememberMe');
+        //页面初始化时，如果帐号密码cookie存在则填充
+        if(getCookie('exampleInputName') && getCookie('pswd')){
+          oUser.value = getCookie('exampleInputName');
+          oPswd.value = getCookie('exampleInputPassword');
+          oRemember.checked = true;
+        }
+        //复选框勾选状态发生改变时，如果未勾选则清除cookie
+        oRemember.onchange = function(){
+          if(!this.checked){
+            delCookie('exampleInputName');
+            delCookie('exampleInputPassword');
+          }
+        };
+        //表单提交事件触发时，如果复选框是勾选状态则保存cookie
+        oForm.onsubmit = function(){
+          if(remember.checked){ 
+            setCookie('exampleInputName',oUser.value,15);     //保存帐号到cookie，有效期15天
+            setCookie('exampleInputPassword',oPswd.value,15); //保存密码到cookie，有效期15天
+          }
+        };
+      };
+      //设置cookie
+      function setCookie(name,value,day){
+        var date = new Date();
+        date.setDate(date.getDate() + day);
+        document.cookie = name + '=' + value + ';expires='+ date;
+      };
+      //获取cookie
+      function getCookie(name){
+        var reg = RegExp(name+'=([^;]+)');
+        var arr = document.cookie.match(reg);
+        if(arr){
+          return arr[1];
+        }else{
+          return '';
+        }
+      };
+      //删除cookie
+      function delCookie(name){
+        setCookie(name,null,-1);
+      };
+  </script>
 
 </body>
 </html> 
