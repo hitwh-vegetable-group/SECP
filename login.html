@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <title>vegLogin</title>
+
+  <link href="login.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link href="login.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-primary">
+
+  <div class="container">
+
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+      <div class="col-xl-10 col-lg-12 col-md-9">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+          <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+              <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+              <div class="col-lg-6">
+                <div class="p-5">
+                  <div class="text-center">
+                    <h1 class="h4 text-gray-900 mb-4">欢迎登陆！</h1>
+                  </div>
+                  <form class="user" id="userform" method="POST" action="./login">
+                    <div class="form-group">
+                      <input type="email" name="email" class="form-control form-control-user" id="exampleInputName" aria-describedby="emailHelp" placeholder="用户名.">
+                    </div>
+                    <div class="form-group">
+                      <input type="password" name="psw" class="form-control form-control-user" id="exampleInputPassword" placeholder="密码.">
+                    </div>
+                    <div class="form-group">
+                      <div class="custom-control custom-checkbox small">
+                        <input type="checkbox" name="rememberMe" class="custom-control-input" id="customCheck">
+                        <label class="custom-control-label" for="customCheck">记住我</label>
+                      </div>
+                    </div>
+                    <input type="submit" class="btn btn-primary btn-user btn-block" value="登陆">
+                    <hr>
+                    <a href="forgot-password.html" class="btn btn-google btn-user btn-block">
+                      忘记密码？
+                    </a>
+                    <a href="register.html" class="btn btn-facebook btn-user btn-block">
+                      注册用户！
+                    </a>
+                  </form>
+                  <hr>
+                  <div class="text-center">
+                    <a class="small" href="https://github.com/hitwh-vegetable-group">HITwh Vegetable Group</a>
+                  </div>
+                
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="jquery.min.js"></script>
+  <script src="bootstrap.bundle.min.js"></script>
+  <script src="jquery.easing.min.js"></script>
+  <script src="sb-admin-2.min.js"></script>
+  <script>
+      window.onload = function(){
+        var oForm = document.getElementById('userform');
+        var oUser = document.getElementById('exampleInputName');
+        var oPswd = document.getElementById('exampleInputPassword');
+        var oRemember = document.getElementById('rememberMe');
+        //页面初始化时，如果帐号密码cookie存在则填充
+        if(getCookie('exampleInputName') && getCookie('pswd')){
+          oUser.value = getCookie('exampleInputName');
+          oPswd.value = getCookie('exampleInputPassword');
+          oRemember.checked = true;
+        }
+        //复选框勾选状态发生改变时，如果未勾选则清除cookie
+        oRemember.onchange = function(){
+          if(!this.checked){
+            delCookie('exampleInputName');
+            delCookie('exampleInputPassword');
+          }
+        };
+        //表单提交事件触发时，如果复选框是勾选状态则保存cookie
+        oForm.onsubmit = function(){
+          if(remember.checked){ 
+            setCookie('exampleInputName',oUser.value,15);     //保存帐号到cookie，有效期15天
+            setCookie('exampleInputPassword',oPswd.value,15); //保存密码到cookie，有效期15天
+          }
+        };
+      };
+      //设置cookie
+      function setCookie(name,value,day){
+        var date = new Date();
+        date.setDate(date.getDate() + day);
+        document.cookie = name + '=' + value + ';expires='+ date;
+      };
+      //获取cookie
+      function getCookie(name){
+        var reg = RegExp(name+'=([^;]+)');
+        var arr = document.cookie.match(reg);
+        if(arr){
+          return arr[1];
+        }else{
+          return '';
+        }
+      };
+      //删除cookie
+      function delCookie(name){
+        setCookie(name,null,-1);
+      };
+  </script>
+
+</body>
+</html> 
