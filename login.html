@@ -31,22 +31,20 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">欢迎登陆！</h1>
                   </div>
-                  <form class="user">
+                  <form class="user" method="POST" action="./login">
                     <div class="form-group">
-                      <input type="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="用户名.">
+                      <input type="email" name="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="用户名.">
                     </div>
                     <div class="form-group">
-                      <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="密码.">
+                      <input type="password" name="psw" class="form-control form-control-user" id="exampleInputPassword" placeholder="密码.">
                     </div>
                     <div class="form-group">
                       <div class="custom-control custom-checkbox small">
-                        <input type="checkbox" class="custom-control-input" id="customCheck">
+                        <input type="checkbox" name="rememberMe" class="custom-control-input" id="customCheck">
                         <label class="custom-control-label" for="customCheck">记住我</label>
                       </div>
                     </div>
-                    <a href="index.html" class="btn btn-primary btn-user btn-block">
-                      登陆
-                    </a>
+                    <input type="submit" class="btn btn-primary btn-user btn-block" value="登陆">
                     <hr>
                     <a href="forgot-password.html" class="btn btn-google btn-user btn-block">
                       忘记密码？

@@ -23,7 +23,7 @@
               <div class="text-center">
                 <h1 class="h4 text-gray-900 mb-4">注册新用户！</h1>
               </div>
-              <form class="user">
+              <form class="user" method="POST" action="./register">
               
                
                   <div class="form-group">
@@ -44,19 +44,27 @@
                 <h2 style="font-size:1pc ; color:gray">  安全问题将用于找回密码</h2>
                 
                   <div class="form-group">
-                    <input type="text" class="form-control form-control-user" id="exampleInputPassword" placeholder="安全问题1">
+                      <select class="form-control mb-2" name="forgetPsw[][quest]">
+                        <option>问题1</option>
+                        <option>问题2</option>
+                        <option>问题3</option>
+                        <option>问题4</option>
+                        <option>问题5</option>
+                      </select>
+                    <input type="text" class="form-control" name="forgetPsw[][asw]" placeholder="安全问题1">
                   </div>
                   <div class="form-group">
-                    <input type="text" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="安全问题2">
-                  </div>
-                  <div class="form-group">
-                    <input type="text" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="安全问题3">
+                      <select class="form-control mb-2" name="forgetPsw[][quest]">
+                        <option>问题1</option>
+                        <option>问题2</option>
+                        <option>问题3</option>
+                        <option>问题4</option>
+                        <option>问题5</option>
+                      </select>
+                    <input type="text" class="form-control" name="forgetPsw[][asw]" placeholder="安全问题2">
                   </div>
                
-
-                <a href="login.html" class="btn btn-primary btn-user btn-block">
-                  注册账户
-                </a>
+                <input type="submit" class="btn btn-primary btn-user btn-block" value="注册账户">
               </form>
               <hr>
               <div class="text-center">
