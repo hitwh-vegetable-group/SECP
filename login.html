@@ -31,7 +31,7 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">欢迎登陆！</h1>
                   </div>
-                  <form class="user" id="userform" method="POST" action="./login">
+                  <form class="user" id="loginform">
                     <div class="form-group">
                       <input type="email" name="email" class="form-control form-control-user" id="exampleInputName" aria-describedby="emailHelp" placeholder="用户名.">
                     </div>
@@ -44,7 +44,10 @@
                         <label class="custom-control-label" for="customCheck">记住我</label>
                       </div>
                     </div>
-                    <input type="submit" class="btn btn-primary btn-user btn-block" value="登陆">
+                    <button type="button" class="btn btn-primary" id="btnLogin">
+                      登陆
+                    </button>
+                  </form>
                     <hr>
                     <a href="forgot-password.html" class="btn btn-google btn-user btn-block">
                       忘记密码？
@@ -52,7 +55,7 @@
                     <a href="register.html" class="btn btn-facebook btn-user btn-block">
                       注册用户！
                     </a>
-                  </form>
+                  
                   <hr>
                   <div class="text-center">
                     <a class="small" href="https://github.com/hitwh-vegetable-group">HITwh Vegetable Group</a>
@@ -119,6 +122,31 @@
       function delCookie(name){
         setCookie(name,null,-1);
       };
+
+      $("#btnLogin").click(function (){
+      $.ajax({
+        async: true,   		//是否为异步请求
+				cache: false,  		//是否缓存结果
+				type: "POST", 		//请求方式
+				dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+				url: "./login",
+				data: $("#loginform").serialize(),
+				success: function (data) {
+          alert("登陆成功");
+          ////window.location.href="李靖的页面"
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          alert("密码有误");
+          window.location.href="login.html"
+					// 状态码
+					console.log("status:" + XMLHttpRequest.status + "\n");
+					// 状态
+					console.log("readyState:" + XMLHttpRequest.readyState + "\n");
+					// 错误信息   
+					console.log("textStatus:" + textStatus + "\n");
+        }
+			});
+    });
   </script>
 
 </body>

@@ -23,9 +23,7 @@
               <div class="text-center">
                 <h1 class="h4 text-gray-900 mb-4">注册新用户！</h1>
               </div>
-              <form class="user" method="POST" action="./register">
-              
-               
+              <form class="user" id="registerform">
                   <div class="form-group">
                     <input type="text" class="form-control form-control-user" id="exampleFirstName" placeholder="用户名">
                   </div>
@@ -63,8 +61,9 @@
                       </select>
                     <input type="text" class="form-control" name="forgetPsw[][asw]" placeholder="安全问题2">
                   </div>
-               
-                <input type="submit" class="btn btn-primary btn-user btn-block" value="注册账户">
+                  <button type="button" class="btn btn-primary" id="btnRegister">
+                    注册
+                  </button>
               </form>
               <hr>
               <div class="text-center">
@@ -84,6 +83,32 @@
   <script src="bootstrap.bundle.min.js"></script>
   <script src="jquery.easing.min.js"></script>
   <script src="sb-admin-2.min.js"></script>
+  <script>
+   $("#btnRegister").click(function (){
+      $.ajax({
+        async: true,   		//是否为异步请求
+				cache: false,  		//是否缓存结果
+				type: "POST", 		//请求方式
+				dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+				url: "./register",
+				data: $("#registerform").serialize(),
+				success: function (data) {
+          alert("注册成功");
+          window.location.href="login.html"
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          alert("注册失败");
+          window.location.href="register.html"
+					// 状态码
+					console.log("status:" + XMLHttpRequest.status + "\n");
+					// 状态
+					console.log("readyState:" + XMLHttpRequest.readyState + "\n");
+					// 错误信息   
+					console.log("textStatus:" + textStatus + "\n");
+        }
+			});
+    });
+  </script>
 
 </body>
 
