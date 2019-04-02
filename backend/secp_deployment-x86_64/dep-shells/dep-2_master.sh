@@ -207,7 +207,7 @@ cat > etcd-csr.json <<EOF
   "CN": "etcd",
   "hosts": [
     "127.0.0.1",
-    "192.168.200.133",
+    "192.168.200.140",
     "192.168.200.136",
     "192.168.200.138",
 	"secp-master",
@@ -518,7 +518,7 @@ listen kube-master
     mode tcp
     option tcplog
     balance source
-    server 192.168.200.133 192.168.200.133:6443 check inter 2000 fall 2 rise 2 weight 1
+    server 192.168.200.140 192.168.200.140:6443 check inter 2000 fall 2 rise 2 weight 1
     server 192.168.200.136 192.168.200.136:6443 check inter 2000 fall 2 rise 2 weight 1
     server 192.168.200.138 192.168.200.138:6443 check inter 2000 fall 2 rise 2 weight 1
 EOF
@@ -595,7 +595,7 @@ vrrp_instance VI-kube-master {
 EOF
 
 echo "\n>>  分发 KeepAlived - Master/Backup 配置文件..."
-scp keepalived-master.conf root@192.168.200.133:/etc/keepalived/keepalived.conf
+scp keepalived-master.conf root@192.168.200.140:/etc/keepalived/keepalived.conf
 scp keepalived-backup.conf root@192.168.200.136:/etc/keepalived/keepalived.conf
 scp keepalived-backup.conf root@192.168.200.138:/etc/keepalived/keepalived.conf
 
@@ -636,7 +636,7 @@ cat > kubernetes-csr.json <<EOF
   "hosts": [
     "localhost",
     "127.0.0.1",
-    "192.168.200.133",
+    "192.168.200.140",
     "192.168.200.136",
     "192.168.200.138",
     "secp-master",
@@ -823,7 +823,7 @@ cat > kube-controller-manager-csr.json <<EOF
     "hosts": [
       "localhost",
       "127.0.0.1",
-      "192.168.200.133",
+      "192.168.200.140",
       "192.168.200.136",
       "192.168.200.138",
       "secp-master",
@@ -965,7 +965,7 @@ cat > kube-scheduler-csr.json <<EOF
     "hosts": [
       "localhost",
       "127.0.0.1",
-      "192.168.200.133",
+      "192.168.200.140",
       "192.168.200.136",
       "192.168.200.138",
       "secp-master",
