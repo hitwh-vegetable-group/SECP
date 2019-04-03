@@ -1504,7 +1504,7 @@ for node_ip in ${NODE_IPS[@]}
   do
 	echo ">>> 拷贝镜像到 root@${node_ip} ..."
 	scp ${SECP_DEP_DOCKERIMG}/* root@${node_ip}:${SECP_DEP_DOCKERIMG}
-	ssh root@${node_ip} "chmod +x ${SECP_DEP_DOCKERIMG}/*.sh && cd ${SECP_DEP_DOCKERIMG} && ./load_images.sh"
+	ssh root@${node_ip} "chmod +x ${SECP_DEP_DOCKERIMG}/*.sh && cd ${SECP_DEP_DOCKERIMG} && dos2unix *.sh && ./load_images.sh"
   done
 
 clear
