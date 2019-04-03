@@ -24,7 +24,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 
 
 
-# 软件工程课程设计 - 简易校园边缘计算平台
+# 软件工程课程设计 - 简易校园边缘计算平台 - 哈小微容器云
 
 注意：此项目仍在开发中
 
