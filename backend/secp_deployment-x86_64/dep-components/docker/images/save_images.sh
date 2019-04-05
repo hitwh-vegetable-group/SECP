@@ -4,6 +4,12 @@
 
 #!/bin/sh
 
+echo "> Loading Busybox..."
+/opt/k8s/bin/docker save hitwhvg/busybox:glibc > hitwhvg-busybox-glibc.tar
+
+echo "> Loading Ubuntu..."
+/opt/k8s/bin/docker save hitwhvg/ubuntu:16.04 > hitwhvg-ubuntu-16.04.tar
+
 echo "> Saving Kube State Metrics..."
 /opt/k8s/bin/docker save hitwhvg/kube-state-metrics:v1.4.0  > hitwhvg-kube.tar
 

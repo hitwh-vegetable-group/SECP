@@ -1,22 +1,32 @@
 # License: GNU AGPL v3.0
 # Author: HITwh Vegetable Group :: ArHShRn
 
-FROM ubuntu:16.04
+FROM hitwhvg/ubuntu:16.04
 LABEL maintainer="HITwh Vegetable Group <https://github.com/hitwh-vegetable-group>"
 
-COPY lnmp1.5-full.tar.gz /opt
+# Copy LNMP tarball
+COPY lnmp1.5-full.tar.gz /lnmp/tarball/lnmp.tgz
+COPY lnmp_restart.sh /lnmp
 
-RUN ln -s /usr/share/prometheus/console_libraries /usr/share/prometheus/consoles/ /etc/prometheus/
-RUN mkdir -p /prometheus && \
-    chown -R nobody:nogroup etc/prometheus /prometheus
+# Change apt source
+RUN apt update 
+RUN apt upgrade -y
+RUN apt install -y apt-transport-https
+RUN rm -f /etc/apt/sources.list
+COPY sources.list /etc/apt
+RUN apt update
 
-USER nobody
-EXPOSE 9090
-VOLUME     [ "/prometheus" ]
-WORKDIR    /prometheus
-ENTRYPOINT /bin/prometheus \
-             --config.file=/etc/prometheus/prometheus.yml \
-             --storage.tsdb.path=/prometheus \
-             --web.console.libraries=/usr/share/prometheus/console_libraries \
-             --web.console.templates=/usr/share/prometheus/consoles \
-             & /bin/node_exporter
+# Unzip tarball
+RUN cd /lnmp/tarball && tar -zxvf ./lnmp.tgz -C /lnmp
+
+# Deploy LNMP
+RUN cd /lnmp/lnmp1.5-full && pwd && ls -l --block-size=M
+RUN cd /lnmp/lnmp1.5-full && chmod +x ./install.sh
+RUN cd /lnmp/lnmp1.5-full && LNMP_Auto="y" DBSelect="2" DB_Root_Password="hitwh1604102" InstallInnodb="y" PHPSelect="5" SelectMalloc="1" ./install.sh lnmp
+
+# Clean environment
+RUN rm -rf /lnmp/tarball && rm -rf /lnmp/lnmp1.5-full
+
+USER root
+EXPOSE 80 443 3306
+ENTRYPOINT /lnmp/lnmp_restart.sh

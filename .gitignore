@@ -8,3 +8,6 @@
 cfssl
 cfssl-certinfo
 cfssljson
+
+# LNMP
+./backend/secp_deployment-x86_64/dep-services/lnmp/lnmp1.5-full
