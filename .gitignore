@@ -4,6 +4,9 @@
 *.deb
 *.tgz
 
+# Checksums
+*.sha256
+
 # Pre-downloaded contents
 cfssl
 cfssl-certinfo

@@ -5,4 +5,8 @@
 #set -o errexit
 
 tar -zcvf ./secp_deployment-x86_64.tgz ./secp_deployment-x86_64
-sha256sum ./secp_deployment-x86_64.tgz > secp_deployment-x86_64.SHA256
+
+echo "Calculating SHA256 Checksums..."
+sha256sum ./secp_deployment-x86_64.tgz > secp_deployment-x86_64.sha256
+
+echo "All Done."
