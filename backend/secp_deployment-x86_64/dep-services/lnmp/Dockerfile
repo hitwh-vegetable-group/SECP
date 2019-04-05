@@ -75,7 +75,7 @@ RUN cd /lnmp/lnmp1.5-full && \
     chmod +x ./install.sh && \
     LNMP_Auto="y" \
     DBSelect="3" \
-    DB_Root_Password="hitwh1604102" \
+    DB_Root_Password="" \
     InstallInnodb="y" \
     PHPSelect="8" \
     SelectMalloc="1" \
@@ -92,6 +92,6 @@ RUN cd /lnmp && \
 
 
 # USER root
-EXPOSE 80 443 3306
+EXPOSE 80 443 3306 8000
 WORKDIR /lnmp
 ENTRYPOINT /lnmp/lnmp_restart.sh & top -d 10
