@@ -1,0 +1,11 @@
+# Directory
+lnmp/
+
+# tarballs but not lnmp tarball
+*.tar
+*.tar.gz
+*.tgz
+!lnmp1.5-full.tgz
+
+#SHA256 Checksums
+*.sha256

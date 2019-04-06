@@ -130,16 +130,24 @@
         async: true,   		//是否为异步请求
 				cache: false,  		//是否缓存结果
 				type: "POST", 		//请求方式
-				dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
-				url: "./login",
+        dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+        // dataType: "text", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+				url: "./php-logic/login.php",
 				data: $("#loginform").serialize(),
 				success: function (data) {
-          alert("登陆成功");
-          ////window.location.href="李靖的页面"
+          if(data.code == "200")
+          {
+            alert(data.msg);
+            window.location.href="index1.0.html";
+          }
+          else
+          {
+            alert(data.msg);
+          }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
           alert("密码有误");
-          window.location.href="index1.0.html"
+          // window.location.href="login.html"
 					// 状态码
 					console.log("status:" + XMLHttpRequest.status + "\n");
 					// 状态
