@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-monitor
-  namespace: hitwhvg-monitoring
+  name: monitor-all-in-one
+  # namespace: hitwhvg-monitoring
   labels:
-    name: hitwhvg
+    app: monitor
 spec:
   containers:
   - name: prometheus-with-ne
