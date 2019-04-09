@@ -1,0 +1,11 @@
+# Directory
+
+
+# tarballs but not lnmp tarball
+*.tar
+*.tar.gz
+*.tgz
+!secp_panel.tgz
+
+#SHA256 Checksums
+*.sha256

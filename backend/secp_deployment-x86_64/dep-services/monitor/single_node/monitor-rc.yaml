@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: monitor-rc
+  labels:
+    name: monitor
+spec:
+  replicas: 1
+  selector:
+    app: monitor
+  template:
+    metadata:
+     labels:
+       app: monitor
+    spec:
+      containers:
+      - name: grafana
+        image: hitwhvg/grafana:v5.4.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_USER
+          value: admin
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: 3000
+      - name: promne
+        image: hitwhvg/prom-ne:arhshrn
+        ports:
+        - containerPort: 9090

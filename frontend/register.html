@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+  <title>vegRegister</title>
+
+  <link href="login.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <link href="login.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-gradient-primary">
+
+  <div class="container">
+
+    <div class="card o-hidden border-0 shadow-lg my-5">
+      <div class="card-body p-0">
+        <div class="row">
+          <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+          <div class="col-lg-7" >
+            <div class="p-5" >
+              <div class="text-center">
+                <h1 class="h4 text-gray-900 mb-4">注册新用户！</h1>
+              </div>
+              <form class="user" id="registerform">
+                  <div class="form-group">
+                    <input type="text" class="form-control form-control-user" id="exampleFirstName" placeholder="用户名">
+                  </div>
+                          
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3 mb-sm-0">
+                    <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="密码">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="password" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="请再次重复密码">
+                  </div>
+                </div>
+
+                <hr>
+                <h2 style="font-size:1pc ; color:gray">  安全问题将用于找回密码</h2>
+                
+                  <div class="form-group">
+                      <select class="form-control mb-2" name="forgetPsw[][quest]">
+                        <option>最喜欢的颜色</option>
+                        <option>最喜欢的水果</option>
+                        <option>最喜欢的一首歌</option>
+                        <option>最喜欢的一本书</option>
+                        <option>一个人的名字</option>
+                      </select>
+                    <input type="text" class="form-control" name="forgetPsw[][asw]" placeholder="安全问题1">
+                  </div>
+                  <div class="form-group">
+                      <select class="form-control mb-2" name="forgetPsw[][quest]">
+                          <option>最喜欢的颜色</option>
+                          <option>最喜欢的水果</option>
+                          <option>最喜欢的一首歌</option>
+                          <option>最喜欢的一本书</option>
+                          <option>一个人的名字</option>
+                      </select>
+                    <input type="text" class="form-control" name="forgetPsw[][asw]" placeholder="安全问题2">
+                  </div>
+                  <div style="text-align:center" >
+                  <button type="button" style="width:90px" class="btn btn-primary" id="btnRegister">
+                    注册
+                  </button>
+                  </div>
+              </form>
+              <hr>
+              <div class="text-center">
+                <a class="small" href="forgot-password.html">忘记密码？</a>
+              </div>
+              <div class="text-center">
+                <a class="small" href="login.html">已有用户？登陆！</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="jquery.min.js"></script>
+  <script src="bootstrap.bundle.min.js"></script>
+  <script src="jquery.easing.min.js"></script>
+  <script src="sb-admin-2.min.js"></script>
+  <script>
+   $("#btnRegister").click(function (){
+      $.ajax({
+        async: true,   		//是否为异步请求
+				cache: false,  		//是否缓存结果
+				type: "POST", 		//请求方式
+				dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+				url: "./register",
+				data: $("#registerform").serialize(),
+				success: function (data) {
+          alert("注册成功");
+          window.location.href="login.html"
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          alert("注册失败");
+          window.location.href="register.html"
+					// 状态码
+					console.log("status:" + XMLHttpRequest.status + "\n");
+					// 状态
+					console.log("readyState:" + XMLHttpRequest.readyState + "\n");
+					// 错误信息   
+					console.log("textStatus:" + textStatus + "\n");
+        }
+			});
+    });
+  </script>
+
+</body>
+
+</html>

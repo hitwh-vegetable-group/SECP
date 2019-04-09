@@ -1,0 +1,19 @@
+# HITwhVG Images and Utils
+*.tar
+*.tar.gz
+*.deb
+*.tgz
+
+# Checksums
+*.sha256
+
+# Pre-downloaded contents
+cfssl
+cfssl-certinfo
+cfssljson
+
+# LNMP tarball contents
+lnmp1.5-full/
+
+# SPC lessons
+spc/
