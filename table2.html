@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Table</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css">
+</head>
+
+<body>
+    <div id="toolbar" class="btn-group">
+        <button id="btn_add" type="button" class="btn">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+        </button>
+
+        <button id="btn_delete" type="button" class="btn">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+        </button>
+    </div>
+    <table id="tb_departments"></table>
+
+    <!--model-->
+    <div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>
+                        新增实例
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                </div>
+                <form class="user" id="addform">
+                    <div class="form-group" id="add-example">
+                        <div class="form-group" style="margin-left:90px;">
+                            <label id="setid">服务器实例昵称:</label>
+                            <input type="text" class="form-control form-control-user" style="width:300px" id="id"
+                                placeholder="请输入服务器实例昵称">
+                        </div>
+                        <div class="form-group" style="margin-left:90px;">
+                            <label id="setid">服务器基础镜像:</label>
+                            <input type="text" readonly="readonly" class="form-control form-control-user"
+                                style="width:300px" id="mirrorimage" placeholder="Ubuntu 16.04 LTS">
+                        </div>
+                        <div class="form-group" style="margin-left:90px;">
+                            <label id="">服务器用途:</label>
+                            <input type="text" class="form-control form-control-user" style="width:300px" id="use"
+                                placeholder="请输入服务器用途">
+                        </div>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-addex">
+                        提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+    <script src="bootstrap-table-zh-CN.js"></script>
+    <script>
+        $(function () {
+            //初始化Table
+            var oTable = new TableInit();
+            oTable.Init();
+        });
+
+
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_departments').bootstrapTable({
+                    url: '/data',                       //请求后台的URL（*）   No matching records found
+                    method: 'get',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    sortable: false,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    queryParams: oTableInit.queryParams,//传递参数（*）
+                    sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 10,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大 ??????
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+                    showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+                    columns: [{
+                        checkbox: true
+                    }, {
+                        field: 'id',
+                        title: 'ID/实例名'
+                    }, {
+                        field: 'status',
+                        title: '状态'
+                    }, {
+                        field: 'set',
+                        title: '配置'
+                    }, {
+                        field: 'ip',
+                        title: '主IP地址'
+                    },]
+                });
+            };
+
+            //得到查询的参数
+            oTableInit.queryParams = function (params) {
+                var temp = {   //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+                    limit: params.limit,   //页面大小
+                    offset: params.offset,  //页码
+                    departmentname: $("#txt_search_departmentname").val(),
+                    statu: $("#txt_search_statu").val()
+                };
+                return temp;
+            };
+            return oTableInit;
+        };
+
+        $("#btn_add").click(function () {
+
+            $('#add').modal('show')
+        })
+
+        $("#btn-addex").click(function () {
+            $.ajax({
+                async: true,   		        //是否为异步请求
+                cache: false,  		//是否缓存结果
+                type: "POST", 		//请求方式
+                dataType: "jsonp", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback
+                url: "./addform",
+                data: $("#changeConfirm").serialize(),
+                success: function (data) {
+                    alert("添加成功");
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("添加失败");
+                    // 状态码
+                    console.log("status:" + XMLHttpRequest.status + "\n");
+                    // 状态
+                    console.log("readyState:" + XMLHttpRequest.readyState + "\n");
+                    // 错误信息   
+                    console.log("textStatus:" + textStatus + "\n");
+                }
+            });
+        });
+
+
+        $("#btn_delete").click(function () {
+
+            var ids = "";//得到用户选择的数据的ID
+            var rows = $("#tb_departments").bootstrapTable('getSelections');  //获取选择
+            console.log($("#tb_departments"))
+            for (var i = 0; i < rows.length; i++) {
+                ids += rows[i].ID + ',';
+            }
+            ids = ids.substring(0, ids.length - 1);      // DeleteByIds(ids);    目前得到id,id,id,id    
+            $.ajax({
+                async: true,   		    //是否为异步请求
+                cache: false,  		//是否缓存结果
+                type: "POST", 		//请求方式
+                dataType: "int", 	//服务器返回的数据是什么类型，注意是jsonp，回调函数callback 其实这个我也有点不确定什么类型。。
+                url: "./deleteForm",
+                data: {"deleteItem":ids},
+                success: function (data) {
+                    alert("删除成功");
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("删除失败");
+                    // 状态码
+                    console.log("status:" + XMLHttpRequest.status + "\n");
+                    // 状态
+                    console.log("readyState:" + XMLHttpRequest.readyState + "\n");
+                    // 错误信息   
+                    console.log("textStatus:" + textStatus + "\n");
+                }
+            });
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
